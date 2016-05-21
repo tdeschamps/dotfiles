@@ -8,6 +8,24 @@ backup() {
   fi
 }
 
+# Check if you have brew installed and install vim, tmux, python (for powerline),
+# reattach-to-user-namespace (for tmux), z and ag (the_silver_searcher for vim's ctrlp plugin)
+if type "brew" > /dev/null
+then
+  brew update
+  brew install vim --override-system-vi tmux python reattach-to-user-namespace z ag
+  pip install psutil
+  pip install powerline-status
+else
+  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+fi
+
+# Check that you have robby russell's excellent oh-my-zsh
+if [ $(echo $ZSH) != $(echo $HOME/.oh-my-zsh) ]
+then
+  sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+fi
+
 #!/bin/zsh
 for name in *; do
   if [ ! -d "$name" ]; then
