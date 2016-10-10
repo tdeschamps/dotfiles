@@ -52,3 +52,6 @@ export NVM_DIR="$HOME/.nvm"
 #Export path for nvm
 export NVM_DIR="$HOME/.nvm"
   . "$(brew --prefix nvm)/nvm.sh"
+
+#Export path for mysql
+export PATH=/usr/local/mysql/bin:$PATH

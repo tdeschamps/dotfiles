@@ -4,7 +4,6 @@
 
 [color]
   branch = auto
-  diff = auto
   interactive = auto
   status = auto
   ui = auto
@@ -50,3 +49,4 @@
 
 [branch "master"]
   mergeoptions = --no-edit
+[color "diff"]
