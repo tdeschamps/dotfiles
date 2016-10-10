@@ -336,32 +336,6 @@ curl -Ls https://raw.githubusercontent.com/lewagon/setup/master/check.rb | ruby
 It should tell you if your workstation is ready :) If not, ask a teacher. If you don't want
 your email to appear on your GitHub profile, you can now revert the `Public email` setting.
 
-
-## Alumni
-
-Register as a Wagon alumni by going to [alumni.lewagon.org/onboarding](http://alumni.lewagon.org/onboarding). Select your batch, sign in with GitHub and enter all your information.
-
-Your teacher will then validate that you are indeed part of the batch. You can ask him to do it as soon as you completed the registration form.
-
-Once the teacher has approved your profile, go to your email inbox. You should have 2 emails:
-
-- One from Slack, inviting you to the Le Wagon Alumni slack community (where you'll chat with your buddies and all the previous alumni). Click on **Join** and fill the information.
-- One from GitHub, inviting you to `lewagon` team. **Accept it** otherwise you won't be able to access the lecture slides.
-
-
-## Slack
-
-[Download](https://itunes.apple.com/fr/app/slack/id803453959?mt=12) the Slack native app from the mac App Store, and sign in to `lewagon-alumni` organization.
-
-Make sure you upload a picture there.
-
-You can also sign in to Slack on your iPhone or Android device!
-
-The idea is that you'll have Slack open all day, so that you can share useful links / ask for help / decide where to go to lunch / etc.
-
-Enjoy your ride with Le Wagon :)
-
-
 ## Keyboard
 
 As you become a programer, you'll understand that leaving the keyboard takes a lot of time,
