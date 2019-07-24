@@ -1,6 +1,7 @@
-" Pathogen
-execute pathogen#infect()
-
+syntax on
+filetype plugin indent on
+filetype plugin on
+set termguicolors
 " allow backspacing over everything in insert mode
 set backspace=indent,eol,start
 
@@ -45,10 +46,10 @@ noremap <leader>p :set paste<CR>:put  *<CR>:set nopaste<CR>
 " sachet's vimrc
 set nocompatible
 
-set statusline=%<\ %n:%f\ %m%r%y%=%-35.(line:\ %l\ of\ %L,\ col:\ %c%V\ (%P)%)
-filetype plugin indent on
+" set statusline=%<\ %n:%f\ %m%r%y%=%-35.(line:\ %l\ of\ %L,\ col:\ %c%V\ (%P)%)
+" filetype plugin indent on
 
-syntax on
+" syntax on
 set number
 set hlsearch
 set showmatch
@@ -96,12 +97,12 @@ let g:html_indent_style1 = "inc"
 " Solarized
  syntax enable
  set background=dark
- colorscheme solarized
+ colorscheme solarized8
 
 " powerline
-set rtp+=/usr/local/lib/python2.7/site-packages/powerline/bindings/vim
-set laststatus=2
-set guifont=Monaco\ for\ Powerline
+"set rtp+=/Users/thomasdeschamps/.pyenv/versions/3.7.0/lib/python3.7/site-packages/powerline/bindings/vim
+"set laststatus=2
+set guifont="Hack Nerd"
 
 " creates the swapfiles in /tmp
 set dir=/tmp
@@ -137,6 +138,21 @@ endif
 let g:ctrlp_user_command = 'ag %s -l -i -g ""'
 let g:ctrlp_use_caching = 0
 
+" Airline 
+let g:airline_powerline_fonts = 1
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#formatter = 'default'
+let g:airline_theme='simple'
 " git grep inside vim using AG
 set grepprg=ag\ --nogroup
 nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
+
+" nerdcommenter
+" " Add spaces after comment delimiters by default
+let g:NERDSpaceDelims = 1
+
+" Use compact syntax for prettified multi-line comments
+let g:NERDCompactSexyComs = 1
+
+" Align line-wise comment delimiters flush left instead of following code indentation
+let g:NERDDefaultAlign = 'left'
