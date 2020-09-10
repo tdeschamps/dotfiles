@@ -4,6 +4,9 @@ filetype plugin on
 set termguicolors
 " allow backspacing over everything in insert mode
 set backspace=indent,eol,start
+set rtp+=/usr/local/opt/fzf
+
+let g:fzf_preview_window = 'right:60%'
 
 " keep the current selection when indenting (thanks cbus)
 vnoremap < <gv
@@ -95,9 +98,10 @@ let g:html_indent_script1 = "inc"
 let g:html_indent_style1 = "inc"
 
 " Solarized
- syntax enable
- set background=dark
- colorscheme solarized8
+set background=dark
+colorscheme solarized8
+" colorscheme gruvbox
+let g:gruvbox_contrast_dark = 'hard'
 
 " powerline
 "set rtp+=/Users/thomasdeschamps/.pyenv/versions/3.7.0/lib/python3.7/site-packages/powerline/bindings/vim
@@ -135,17 +139,23 @@ else
 endif
 
 " use the silver searcher (AG) for ctrlp
-let g:ctrlp_user_command = 'ag %s -l -i -g ""'
+set grepprg=rg\ --color=never
+let g:ctrlp_user_command = 'rg %s --files --color=never --glob ""'
 let g:ctrlp_use_caching = 0
 
-" Airline 
+  " Airline
 let g:airline_powerline_fonts = 1
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#formatter = 'default'
 let g:airline_theme='simple'
+let g:airline#extensions#ale#enabled = 1
 " git grep inside vim using AG
-set grepprg=ag\ --nogroup
-nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
+" set grepprg=ag\ --nogroup
+" nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
+
+" Add preview when searching for files
+command! -bang -nargs=? -complete=dir Files
+    \ call fzf#vim#files(<q-args>, {'options': ['--layout=reverse', '--info=inline', '--preview', 'bat --style=numbers --color=always --line-range :500 {}']}, <bang>0)
 
 " nerdcommenter
 " " Add spaces after comment delimiters by default
@@ -156,3 +166,19 @@ let g:NERDCompactSexyComs = 1
 
 " Align line-wise comment delimiters flush left instead of following code indentation
 let g:NERDDefaultAlign = 'left'
+let g:ale_fixers = { '*': ['remove_trailing_lines', 'trim_whitespace'] }
+let g:ale_fixers = {
+\  '*': ['remove_trailing_lines', 'trim_whitespace'],
+\  'javascript': ['prettier', 'eslint'],
+\  'json': ['prettier'],
+\  'ruby': ['rubocop'],
+\  'rust': ['rustfmt'],
+\  'typescript': ['prettier', 'eslint'],
+\}
+let b:ale_linters = {
+\  'rust': ['rustfmt'],
+\}
+let g:ale_completion_enabled = 1
+let g:ale_fix_on_save = 1
+
+set wildignore=*/node_modules/*,*/target/*,*/log/*,*/tmp/*,*/.bundle/*

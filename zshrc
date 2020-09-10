@@ -10,7 +10,7 @@ COMPLETION_WAITING_DOTS="true"
 
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
-plugins=(gitfast git brew rbenv last-working-dir common-aliases sublime history-substring-search extract tmux rails bundler zsh-syntax-highlighting docker docker-compose)
+plugins=(gitfast git brew rbenv last-working-dir common-aliases sublime history-substring-search extract tmux rails bundler zsh-syntax-highlighting docker docker-compose gcloud)
 
 source $ZSH/oh-my-zsh.sh
 export PATH='/usr/local/bin:/usr/local/share:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/sbin:/usr/local/share/npm/bin:/usr/X11/bin:/usr/texbin:~/bin'
@@ -39,7 +39,8 @@ export GOPATH=$HOME/golang
 export GOROOT=/usr/local/opt/go/libexec
 export PATH=$PATH:$GOPATH/bin
 export PATH=$PATH:$GOROOT/bin
-
+export RUSTPATH=$HOME/.cargo
+export PATH=$PATH:$RUSTPATH/bin
 export GOOGLE_APPLICATION_CREDENTIALS="$HOME/.google_cloud/service-account-file.json"
 
 #Export path for nvm
@@ -67,3 +68,4 @@ test -s "$HOME/.kiex/scripts/kiex" && source "$HOME/.kiex/scripts/kiex"
 # For pip
 export PATH=$PATH:~/.local/bin
 [[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
+export FZF_DEFAULT_COMMAND='rg --files --hidden'

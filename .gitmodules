@@ -1,0 +1,87 @@
+[submodule "vim/pack/plugin/start/vim-fugitive"]
+	path = vim/pack/plugin/start/vim-fugitive
+	url = https://github.com/tpope/vim-fugitive
+[submodule "vim/pack/plugin/start/vim-surround"]
+	path = vim/pack/plugin/start/vim-surround
+	url = https://github.com/tpope/vim-surround
+[submodule "vim/pack/plugin/start/nerdtree"]
+	path = vim/pack/plugin/start/nerdtree
+	url = https://github.com/scrooloose/nerdtree
+[submodule "vim/pack/plugin/start/ctrlp.vim"]
+	path = vim/pack/plugin/start/ctrlp.vim
+	url = https://github.com/kien/ctrlp.vim
+[submodule "vim/pack/plugin/start/vim-gitgutter"]
+	path = vim/pack/plugin/start/vim-gitgutter
+	url = https://github.com/airblade/vim-gitgutter
+[submodule "vim/pack/plugin/start/vim-airline"]
+	path = vim/pack/plugin/start/vim-airline
+	url = https://github.com/vim-airline/vim-airline
+[submodule "vim/pack/plugin/start/nerdcommenter"]
+	path = vim/pack/plugin/start/nerdcommenter
+	url = https://github.com/scrooloose/nerdcommenter
+[submodule "vim/pack/plugin/start/vim-airline-themes"]
+	path = vim/pack/plugin/start/vim-airline-themes
+	url = https://github.com/vim-airline/vim-airline-themes
+[submodule "vim/pack/plugin/start/ale"]
+	path = vim/pack/plugin/start/ale
+	url = https://github.com/w0rp/ale
+[submodule "vim/pack/plugin/start/emmet-vim"]
+	path = vim/pack/plugin/start/emmet-vim
+	url = https://github.com/mattn/emmet-vim
+[submodule "vim/pack/plugin/start/vim-go"]
+	path = vim/pack/plugin/start/vim-go
+	url = https://github.com/fatih/vim-go
+[submodule "vim/pack/plugin/start/vim-jsx"]
+	path = vim/pack/plugin/start/vim-jsx
+	url = https://github.com/mxw/vim-jsx
+[submodule "vim/pack/plugin/start/https:/github.com/terryma/vim-multiple-cursors"]
+	path = vim/pack/plugin/start/https:/github.com/terryma/vim-multiple-cursors
+	url = https://github.com/vim-ruby/vim-ruby
+[submodule "vim/pack/plugin/start/https:/github.com/pangloss/vim-javascript"]
+	path = vim/pack/plugin/start/https:/github.com/pangloss/vim-javascript
+	url = https://github.com/easymotion/vim-easymotion
+[submodule "vim/pack/plugin/start/vim-easymotion"]
+	path = vim/pack/plugin/start/vim-easymotion
+	url = https://github.com/easymotion/vim-easymotion
+[submodule "vim/pack/plugin/start/https:/github.com/junegunn/fzf"]
+	path = vim/pack/plugin/start/https:/github.com/junegunn/fzf
+	url = https://github.com/tpope/vim-rails
+[submodule "vim/pack/plugin/start/vim-ruby"]
+	path = vim/pack/plugin/start/vim-ruby
+	url = https://github.com/vim-ruby/vim-ruby
+[submodule "vim/pack/plugin/start/vim-elixir"]
+	path = vim/pack/plugin/start/vim-elixir
+	url = https://github.com/elixir-lang/vim-elixir
+[submodule "vim/pack/plugin/start/vim-solarized8"]
+	path = vim/pack/plugin/start/vim-solarized8
+	url = https://github.com/lifepillar/vim-solarized8
+[submodule "vim/pack/plugin/start/vim-rails"]
+	path = vim/pack/plugin/start/vim-rails
+	url = https://github.com/tpope/vim-rails
+[submodule "vim/pack/plugin/start/vim-multiple-cursors"]
+	path = vim/pack/plugin/start/vim-multiple-cursors
+	url = https://github.com/terryma/vim-multiple-cursors
+[submodule "vim/pack/plugin/start/rust.vim"]
+	path = vim/pack/plugin/start/rust.vim
+	url = https://github.com/rust-lang/rust.vim
+[submodule "vim/pack/plugin/start/gruvbox"]
+	path = vim/pack/plugin/start/gruvbox
+	url = https://github.com/morhetz/gruvbox.git
+[submodule "vim/pack/plugin/start/ack.vim"]
+	path = vim/pack/plugin/start/ack.vim
+	url = https://github.com/mileszs/ack.vim.git
+[submodule "vim/pack/plugin/start/vim-jsx-typescript"]
+	path = vim/pack/plugin/start/vim-jsx-typescript
+	url = https://github.com/peitalin/vim-jsx-typescript.git
+[submodule "vim/pack/plugin/start/vim-endwise"]
+	path = vim/pack/plugin/start/vim-endwise
+	url = https://github.com/tpope/vim-endwise.git
+[submodule "vim/pack/plugin/start/auto-pairs"]
+	path = vim/pack/plugin/start/auto-pairs
+	url = https://github.com/jiangmiao/auto-pairs.git
+[submodule "vim/pack/plugin/start/vim-slim"]
+	path = vim/pack/plugin/start/vim-slim
+	url = https://github.com/slim-template/vim-slim.git
+[submodule "vim/pack/plugin/start/vim-fish"]
+	path = vim/pack/plugin/start/vim-fish
+	url = https://github.com/dag/vim-fish.git
