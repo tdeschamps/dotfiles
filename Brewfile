@@ -35,8 +35,7 @@ brew "gh"
 brew "mise"
 
 # Build dependencies for the runtimes mise compiles rather than downloads.
-# Ruby needs these; Erlang additionally wants wxwidgets, libxslt and fop if you
-# care about observer and the docs (see README).
+# Ruby needs these; the rest of the pinned runtimes are precompiled downloads.
 brew "autoconf"
 brew "openssl@3"
 brew "readline"

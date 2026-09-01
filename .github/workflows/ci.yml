@@ -118,8 +118,7 @@ jobs:
           # The README table is the human-facing copy of the same data.
           readme = open("README.md").read()
           label = {"ruby": "Ruby", "node": "Node.js", "python": "Python",
-                   "go": "Go", "rust": "Rust", "erlang": "Erlang",
-                   "elixir": "Elixir"}
+                   "go": "Go", "rust": "Rust"}
           problems = []
           for tool, version in tools.items():
               if tool not in label:

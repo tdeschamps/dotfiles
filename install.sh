@@ -147,8 +147,8 @@ fi
 step "Language runtimes"
 if command -v mise >/dev/null 2>&1; then
   # No plugins to add: every runtime in config/mise/config.toml is a mise core
-  # tool. Installing them is left to you — Ruby and Erlang compile from source
-  # and that is not something an installer should start unannounced.
+  # tool. Installing them is left to you — Ruby compiles from source and that is
+  # not something an installer should start unannounced.
   info "run 'mise install' to build the runtimes in ~/.config/mise/config.toml"
   info "then 'mise doctor' to check the setup"
 else
@@ -207,7 +207,7 @@ cat <<'EOM'
 Next steps:
   1. bash git_setup.sh          set your git name and email
   2. Open a new terminal        fish is now your shell
-  3. mise install               build the runtimes (Ruby and Erlang compile)
+  3. mise install               install the runtimes (Ruby compiles)
   4. Inside tmux: prefix + I    install tmux plugins
   5. nvim :LazyHealth           confirm the editor is happy
 EOM

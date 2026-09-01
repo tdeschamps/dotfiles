@@ -52,8 +52,6 @@ Everything is managed by [mise](https://mise.jdx.dev) and pinned in
 | Python   | 3.14.7  |
 | Go       | 1.27.0  |
 | Rust     | 1.98.0  |
-| Erlang   | 29.0.6  |
-| Elixir   | 1.20.4  |
 
 All seven are mise **core** tools — built into the binary, so there are no
 plugins to install.
@@ -76,9 +74,8 @@ unlike asdf's blanket `legacy_version_file`.
 Because this is the *global* config, per-project files still win: mise merges
 configuration walking up from the current directory.
 
-Erlang and Ruby compile from source. The Brewfile covers the common build
-dependencies; add `wxwidgets`, `libxslt` and `fop` if you want Erlang's
-`observer` and docs.
+Ruby compiles from source; the Brewfile covers its build dependencies. The rest
+are precompiled downloads.
 
 PostgreSQL and Redis stay on Homebrew — they are services, not runtimes:
 
@@ -136,7 +133,7 @@ Three commands worth knowing:
 Recorded in `config/nvim/lazyvim.json`, which `:LazyExtras` rewrites when you
 toggle a module. Fifteen are on:
 
-- **Languages** — ruby, elixir, go, rust, typescript, python, json, yaml, sql,
+- **Languages** — ruby, go, rust, typescript, python, json, yaml, sql,
   docker, markdown, git
 - **Tooling** — prettier (formatting), eslint (linting)
 - **Editing** — mini-surround, because the old vimrc used vim-surround

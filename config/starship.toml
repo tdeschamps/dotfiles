@@ -11,7 +11,6 @@ $nodejs\
 $python\
 $golang\
 $rust\
-$elixir\
 $docker_context\
 $kubernetes\
 $cmd_duration\
@@ -59,10 +58,6 @@ symbol = " "
 format = "[$symbol($version )]($style)"
 
 [rust]
-symbol = " "
-format = "[$symbol($version )]($style)"
-
-[elixir]
 symbol = " "
 format = "[$symbol($version )]($style)"
 
