@@ -92,6 +92,44 @@ jobs:
           test -n "$(git -C "$repo" -c core.pager=cat main)"
           echo "git config OK"
 
+      - name: .tool-versions is well formed and matches the README
+        run: |
+          python3 - <<'PY'
+          import re, sys
+
+          # asdf short names, confirmed against asdf-vm/asdf-plugins
+          known = {"ruby", "nodejs", "python", "golang", "rust", "erlang", "elixir"}
+          pinned = {}
+          for n, line in enumerate(open(".tool-versions"), 1):
+              line = line.split("#")[0].strip()
+              if not line:
+                  continue
+              parts = line.split()
+              assert len(parts) == 2, f".tool-versions:{n}: expected 'tool version', got {line!r}"
+              tool, version = parts
+              assert tool in known, f".tool-versions:{n}: unknown asdf plugin {tool!r}"
+              pinned[tool] = version
+
+          # The README table is the human-facing copy of the same data.
+          readme = open("README.md").read()
+          label = {"ruby": "Ruby", "nodejs": "Node.js", "python": "Python",
+                   "golang": "Go", "rust": "Rust", "erlang": "Erlang",
+                   "elixir": "Elixir"}
+          problems = []
+          for tool, version in pinned.items():
+              row = re.search(r"^\|\s*%s\s*\|\s*(\S+)\s*\|" % re.escape(label[tool]),
+                              readme, re.M)
+              if not row:
+                  problems.append(f"{label[tool]} missing from the README table")
+              elif row.group(1) != version:
+                  problems.append(
+                      f"{label[tool]}: .tool-versions says {version}, README says {row.group(1)}")
+
+          if problems:
+              sys.exit("version drift:\n  " + "\n  ".join(problems))
+          print(f"{len(pinned)} runtimes pinned and consistent with the README")
+          PY
+
       - name: data files are valid
         run: |
           python3 -c "import json; json.load(open('config/nvim/lazyvim.json'))"

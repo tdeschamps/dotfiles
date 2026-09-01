@@ -13,7 +13,9 @@ config/
   git/           git config, global ignore, commit template
   ssh/           ssh client config
   starship.toml  prompt
+asdfrc           asdf options (reads .ruby-version, .nvmrc, ...)
 Brewfile         every package the config expects
+.tool-versions   language runtimes, installed by asdf
 .github/         CI: syntax checks and a full LazyVim bootstrap
 install.sh       idempotent installer
 git_setup.sh     writes your git identity to an untracked local file
@@ -39,52 +41,45 @@ Then open a new terminal, and inside tmux press `prefix + I` (that is
 
 ## Languages
 
-Versions below are the latest stable releases as of **2026-09-01**. This table
-is the reference — there is deliberately no `.tool-versions` file, because
-rbenv, pyenv and nvm.fish do not read one, and a config file that nothing reads
-is just a second place for the truth to rot.
+Everything is managed by [asdf](https://asdf-vm.com) and pinned in
+[`.tool-versions`](.tool-versions). Versions are the latest stable releases as
+of **2026-09-01**.
 
-| Language   | Version  | Manager            |
-| ---------- | -------- | ------------------ |
-| Ruby       | 4.0.6    | rbenv              |
-| Node.js    | 26.8.1   | nvm.fish           |
-| Python     | 3.14.7   | pyenv              |
-| Go         | 1.27.0   | Homebrew           |
-| Rust       | 1.98.0   | rustup             |
-| Elixir     | 1.20.4   | Homebrew           |
-| PostgreSQL | 18.6     | Homebrew           |
+| Language | Version |
+| -------- | ------- |
+| Ruby     | 4.0.6   |
+| Node.js  | 26.8.1  |
+| Python   | 3.14.7  |
+| Go       | 1.27.0  |
+| Rust     | 1.98.0  |
+| Erlang   | 29.0.6  |
+| Elixir   | 1.20.4  |
+
+`install.sh` adds the asdf plugins for you. Building the runtimes is a separate,
+slower step:
 
 ```bash
-# Ruby
-rbenv install 4.0.6 && rbenv global 4.0.6
+asdf install          # everything in .tool-versions
+asdf set ruby 4.0.7   # change one, then asdf install
+```
 
-# Node — 26.x is the current release line. It becomes Active LTS on
-# 2026-10-28; use 24.20.0 instead if you want LTS today.
-nvm install 26.8.1 && set -U nvm_default_version 26.8.1
+Node 26 is the current release line; it becomes Active LTS on 2026-10-28. Use
+`24.20.0` instead if you want LTS today.
 
-# Python
-pyenv install 3.14.7 && pyenv global 3.14.7
+`asdfrc` sets `legacy_version_file = yes`, so asdf also honours the
+`.ruby-version`, `.nvmrc` and `.python-version` files that most repos still
+ship, not just `.tool-versions`.
 
-# Rust
-rustup default stable   # 1.98.0
+Erlang compiles from source. The Brewfile covers the common build dependencies;
+if you want `observer` and the docs, add `wxwidgets`, `libxslt` and `fop`. For
+Elixir, asdf also accepts OTP-tagged versions like `1.20.4-otp-29` when you need
+a build matched to a specific Erlang.
 
-# PostgreSQL
+PostgreSQL and Redis stay on Homebrew — they are services, not runtimes:
+
+```bash
 brew services start postgresql@18
 ```
-
-`brew bundle` already installs Go, Elixir, PostgreSQL 18 and rustup.
-
-If you would rather have one tool manage all of them, `mise` replaces rbenv,
-pyenv, nvm.fish and rustup, and reads a `.tool-versions` file for real:
-
-```bash
-brew install mise
-mise use --global ruby@4.0.6 node@26.8.1 python@3.14.7 go@1.27.0 rust@1.98.0
-```
-
-That is a deliberate migration, not a drop-in: it changes how you install
-languages and removes two `init` evals from every shell start. It has not been
-made here.
 
 ### Ruby gems
 
@@ -231,8 +226,9 @@ since 2020. The rewrite:
 - **fisher** — the vendored copy was v3.3.1 and installed itself from
   `git.io`, which GitHub shut down in 2022. `fishfile` is now `fish_plugins`.
 - **Version managers** — dropped the vendored 2013 rbenv fish shims and
-  `fast-nvm-fish` in favour of `rbenv init - fish`, `pyenv init - fish` and
-  `nvm.fish`.
+  `fast-nvm-fish`. Everything is asdf now, via `.tool-versions`. asdf 0.16 was
+  rewritten in Go, so there is no `asdf.fish` to source any more — the shims
+  directory just goes on `PATH`.
 - **Docker** — `docker-compose` v1 reached end of life in July 2023; the
   abbreviations and completions now use `docker compose`.
 - **tmux** — the config pointed at a powerline install inside a hardcoded

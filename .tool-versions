@@ -1,0 +1,10 @@
+# Latest stable releases as of 2026-09-01. Read by asdf.
+#   asdf install                 install everything listed here
+#   asdf set <tool> <version>    change one
+ruby 4.0.6
+nodejs 26.8.1
+python 3.14.7
+golang 1.27.0
+rust 1.98.0
+erlang 29.0.6
+elixir 1.20.4

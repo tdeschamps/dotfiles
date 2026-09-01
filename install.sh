@@ -117,6 +117,9 @@ mkdir -p "$HOME/.ssh/control"
 chmod 700 "$HOME/.ssh" "$HOME/.ssh/control"
 link "config/ssh/config" "$HOME/.ssh/config"
 
+# asdf
+link "asdfrc" "$HOME/.asdfrc"
+
 # ruby
 link "gemrc" "$HOME/.gemrc"
 link "irbrc" "$HOME/.irbrc"
@@ -139,7 +142,29 @@ else
 fi
 
 #
-# 4. tmux plugin manager
+# 4. asdf plugins
+#
+step "asdf plugins"
+if command -v asdf >/dev/null 2>&1; then
+  # Adding a plugin is a quick clone. Installing the runtimes is not — Ruby and
+  # Erlang compile from source — so that is left for you to run when ready.
+  while read -r tool _version; do
+    case "$tool" in ''|\#*) continue ;; esac
+    if asdf plugin list 2>/dev/null | grep -qx "$tool"; then
+      info "asdf plugin $tool already added"
+    else
+      info "adding asdf plugin $tool"
+      asdf plugin add "$tool" || warn "could not add asdf plugin $tool"
+    fi
+  done < "$DOTFILES/.tool-versions"
+
+  info "run 'asdf install' to build the versions in .tool-versions"
+else
+  warn "asdf is not installed; skipping plugin setup"
+fi
+
+#
+# 5. tmux plugin manager
 #
 step "tmux plugins"
 TPM_DIR="$XDG_CONFIG_HOME/tmux/plugins/tpm"
@@ -151,7 +176,7 @@ else
 fi
 
 #
-# 5. Default shell
+# 6. Default shell
 #
 step "Default shell"
 FISH_PATH="$(command -v fish || true)"
@@ -170,7 +195,7 @@ if [ -n "$FISH_PATH" ]; then
 fi
 
 #
-# 6. Neovim
+# 7. Neovim
 #
 step "Neovim"
 if command -v nvim >/dev/null 2>&1; then
@@ -190,6 +215,7 @@ cat <<'EOM'
 Next steps:
   1. bash git_setup.sh          set your git name and email
   2. Open a new terminal        fish is now your shell
-  3. Inside tmux: prefix + I    install tmux plugins
-  4. nvim :checkhealth          confirm the editor is happy
+  3. asdf install               build the runtimes in .tool-versions (slow)
+  4. Inside tmux: prefix + I    install tmux plugins
+  5. nvim :LazyHealth           confirm the editor is happy
 EOM

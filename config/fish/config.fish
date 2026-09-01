@@ -36,15 +36,13 @@ else
 end
 
 #
-# Go
+# Go — the toolchain comes from asdf; this is just where `go install` puts things
 #
-if command -q go
-    set -gx GOPATH $HOME/code/golang
-    fish_add_path -g $GOPATH/bin
-end
+set -gx GOPATH $HOME/code/golang
+fish_add_path -g $GOPATH/bin
 
 #
-# Rust
+# Rust — cargo installs binaries here regardless of how rustc was installed
 #
 fish_add_path -g $HOME/.cargo/bin
 
@@ -55,15 +53,22 @@ set -l gcloud_creds "$HOME/.google_cloud/service-account-file.json"
 test -f $gcloud_creds; and set -gx GOOGLE_APPLICATION_CREDENTIALS $gcloud_creds
 
 #
-# Version managers
+# asdf — every language runtime (see .tool-versions)
 #
-# rbenv and pyenv ship native fish support; no third-party shims needed.
-command -q rbenv; and rbenv init - fish | source
-command -q pyenv; and pyenv init - fish | source
+# asdf 0.16 was rewritten in Go: there is no asdf.fish to source any more, the
+# shims directory just goes on PATH. This block is verbatim from the upstream
+# fish instructions, including the deliberate avoidance of fish_add_path, which
+# can reorder PATH and let a system runtime win over a shim.
+if test -z "$ASDF_DATA_DIR"
+    set _asdf_shims "$HOME/.asdf/shims"
+else
+    set _asdf_shims "$ASDF_DATA_DIR/shims"
+end
 
-# Node is managed by nvm.fish (see fish_plugins). NVM_DIR is only needed if you
-# also use the bash nvm on the same machine.
-set -q nvm_default_version; or set -gx nvm_default_version lts
+if not contains $_asdf_shims $PATH
+    set -gx --prepend PATH $_asdf_shims
+end
+set --erase _asdf_shims
 
 #
 # fzf
