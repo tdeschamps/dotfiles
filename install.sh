@@ -34,13 +34,21 @@ link() {
     return 0
   fi
 
-  # Back up anything real that is in the way.
+  # Back up anything real that is in the way, without ever overwriting an
+  # earlier backup — a second run with a different file in the way would
+  # otherwise silently destroy the first one.
   if [ -e "$dest" ] || [ -L "$dest" ]; then
     if [ -L "$dest" ]; then
       rm "$dest"
     else
-      mv "$dest" "$dest.backup"
-      warn "moved existing $dest to $dest.backup"
+      backup="$dest.backup"
+      n=1
+      while [ -e "$backup" ] || [ -L "$backup" ]; do
+        backup="$dest.backup.$n"
+        n=$((n + 1))
+      done
+      mv "$dest" "$backup"
+      warn "moved existing $dest to $backup"
     fi
   fi
 
@@ -142,7 +150,6 @@ link "config/mise/config.toml" "$XDG_CONFIG_HOME/mise/config.toml"
 
 # ruby
 link "gemrc" "$HOME/.gemrc"
-link "irbrc" "$HOME/.irbrc"
 link "rspec" "$HOME/.rspec"
 
 #

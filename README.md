@@ -53,7 +53,8 @@ bash install.sh
 It installs Homebrew if missing, runs `brew bundle`, links every config file
 (including `~/.ssh/config`), installs fisher and tpm, sets fish as your login
 shell, and bootstraps LazyVim. Anything real that is in the way is moved to
-`<file>.backup`, and re-running it is safe.
+`<file>.backup` — or `.backup.1`, `.backup.2` and so on, so an earlier backup
+is never overwritten. Re-running it is safe.
 
 **4. Git identity and SSH key.**
 
