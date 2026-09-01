@@ -1,0 +1,11 @@
+
+
+# Subject line: imperative mood, <= 50 characters, no trailing period.
+#   e.g. "Add retry to the webhook client"
+#
+# Body (wrap at 72): why the change is needed and what it changes.
+# Leave out the how — the diff already says that.
+#
+# Footer: issue references, co-authors.
+#   Refs: #123
+#   Co-authored-by: Name <email>

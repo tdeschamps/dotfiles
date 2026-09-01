@@ -1,0 +1,76 @@
+# Starship prompt — https://starship.rs
+# The old setup ran `starship init fish` with no config, so this pins the
+# prompt instead of relying on whatever the default happens to be.
+
+format = """
+$directory\
+$git_branch\
+$git_status\
+$ruby\
+$nodejs\
+$python\
+$golang\
+$rust\
+$elixir\
+$docker_context\
+$kubernetes\
+$cmd_duration\
+$line_break\
+$character"""
+
+add_newline = true
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+vicmd_symbol = "[❮](bold yellow)"
+
+[directory]
+truncation_length = 4
+truncate_to_repo = true
+style = "bold cyan"
+
+[git_branch]
+symbol = " "
+style = "bold purple"
+
+[git_status]
+style = "bold yellow"
+
+[cmd_duration]
+min_time = 2000
+format = "took [$duration]($style) "
+style = "bold yellow"
+
+[ruby]
+symbol = " "
+format = "[$symbol($version )]($style)"
+
+[nodejs]
+symbol = " "
+format = "[$symbol($version )]($style)"
+
+[python]
+symbol = " "
+format = "[$symbol($version )(\\($virtualenv\\) )]($style)"
+
+[golang]
+symbol = " "
+format = "[$symbol($version )]($style)"
+
+[rust]
+symbol = " "
+format = "[$symbol($version )]($style)"
+
+[elixir]
+symbol = " "
+format = "[$symbol($version )]($style)"
+
+[kubernetes]
+disabled = false
+format = "on [⛵ $context\\($namespace\\)](dimmed green) "
+
+# Make production impossible to miss.
+[[kubernetes.contexts]]
+context_pattern = ".*prod.*"
+style = "bold red"

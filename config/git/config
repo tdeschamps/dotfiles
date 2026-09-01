@@ -1,35 +1,55 @@
-[user]
-  email = thomasdscmps@gmail.com
-  name = Thomas Deschamps
+# ~/.config/git/config
+#
+# Identity lives in ~/.config/git/config.local, which is not tracked by this
+# repo. Run `bash git_setup.sh` to create it.
+[include]
+  path = config.local
 
 [alias]
   cad   = "!f() { git log --pretty='format:%C(yellow)%h %aD%Cred%d %Creset%s%C(cyan) [%cn]' --decorate --after=\"$1 0:00\" --before=\"$1 23:59\"; }; f"
-  mcad  = "!f() { git log --pretty='format:%C(yellow)%h %aD%Cred%d %Creset%s%C(cyan) [%cn]' --decorate --after=\"$1 0:00\" --before=\"$1 23:59\" --author \"`git config user.name`\"; }; f"
-  ; lcbc  = log --first-parent --abbrev-commit --pretty=format:'%C(dim white)- %C(reset)%C(yellow)[%h]%C(reset) %C(white)%s%C(reset) %C(cyan)(%an)%C(reset) %C(dim white)%aD%C(reset)'
-  ; lg    = !git lg2
+  mcad  = "!f() { git log --pretty='format:%C(yellow)%h %aD%Cred%d %Creset%s%C(cyan) [%cn]' --decorate --after=\"$1 0:00\" --before=\"$1 23:59\" --author \"$(git config user.name)\"; }; f"
   lg1   = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
   lg2   = log --graph --abbrev-commit --decorate --pretty=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
   lg3   = log --graph --abbrev-commit --decorate --pretty=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
-  lg4   = log --graph --abbrev-commit --decorate --pretty=format:'%C(yellow)%h%C(reset)%C(auto)%d%C(reset) %C(normal)%s%C(reset) %C(dim white)%an%C(reset) %C(dim blue)(%ar)%C (reset)' --all
-  mcad  = "!f() { git log --pretty='format:%C(yellow)%h %aD%Cred%d %Creset%s%C(cyan) [%cn]' --decorate --after=\"$1 0:00\" --before=\"$1 23:59\" --author \"`git config user.name`\"; }; f"
-  ; mlcbc = "!f() { git log --first-parent --abbrev-commit --author \"`git config user.name`\" --pretty=format:'%C(dim white)- %C(reset)%C(yellow)[%h]%C(reset) %C(white)%s%C(reset) %C(cyan)(%an)%C(reset) %C(dim white)%aD%C(reset)'; }; f"
-  plg   = git log --graph --pretty='format:%C(red)%d%C(reset) %C(yellow)%h%C(reset) %ar %C(green)%aN%C(reset) %s'
+  lg4   = log --graph --abbrev-commit --decorate --pretty=format:'%C(yellow)%h%C(reset)%C(auto)%d%C(reset) %C(normal)%s%C(reset) %C(dim white)%an%C(reset) %C(dim blue)(%ar)%C(reset)' --all
+  lg    = !git lg2
   plog  = log --graph --pretty=format:'%h -%d %s %n' --abbrev-commit --date=relative --branches
-  tlg   = ! git log --stat --since='1 Day Ago' --graph --pretty=oneline --abbrev-commit --date=relative
+  tlg   = !git log --stat --since='1 Day Ago' --graph --pretty=oneline --abbrev-commit --date=relative
+  # Show the branch this repo actually calls "main". The pipeline form does not
+  # work here: sed exits 0 even when symbolic-ref finds nothing.
+  main  = "!f() { b=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null); b=${b#origin/}; if [ -z \"$b\" ]; then for c in main master trunk; do if git show-ref --quiet --verify \"refs/heads/$c\"; then b=$c; break; fi; done; fi; echo \"${b:-main}\"; }; f"
+  # Undo the last commit but keep the changes staged
+  undo  = reset --soft HEAD~1
 
 [core]
   ignorecase = false
   excludesfile = ~/.config/git/gitignore
-  pager = diff-so-fancy | less --tabs=4 -RFX
+  editor = nvim
+  # delta is the maintained successor to diff-so-fancy
+  pager = delta
+
+[init]
+  defaultBranch = main
+
+[interactive]
+  diffFilter = delta --color-only
+
+[delta]
+  navigate = true
+  line-numbers = true
+  hyperlinks = true
+
+[merge]
+  conflictstyle = zdiff3
+  tool = nvimdiff
+
+[diff]
+  algorithm = histogram
+  colorMoved = default
+  tool = nvimdiff
 
 [color]
-  ui = true
-
-[color "diff-highlight"]
-  oldNormal = red bold
-  oldHighlight = red bold 52
-  newNormal = green bold
-  newHighlight = green bold 22
+  ui = auto
 
 [color "diff"]
   meta = 11
@@ -42,6 +62,32 @@
 [pull]
   rebase = true
 
+[push]
+  # Create the upstream branch automatically on first push
+  autoSetupRemote = true
+  followTags = true
+
+[fetch]
+  prune = true
+  pruneTags = true
+
+[rebase]
+  autoStash = true
+  autoSquash = true
+  updateRefs = true
+
+[branch]
+  sort = -committerdate
+
+[tag]
+  sort = version:refname
+
 [commit]
   template = ~/.config/git/gitmessage
+  verbose = true
 
+[rerere]
+  enabled = true
+
+[help]
+  autocorrect = prompt

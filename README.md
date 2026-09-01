@@ -1,373 +1,176 @@
-# Setup instructions
+# dotfiles
 
-The following instructions will help you to get ready for:
+Personal configuration for **fish**, **Neovim**, **tmux** and **git**.
 
-- Grab a text editor, where you'll spend your day and nights
-- Install a package manager
-- Pimp your Terminal
-- Setup git and GitHub
-- Install Ruby
+Everything is symlinked out of this repo into `~/.config`, so editing a file
+here changes the live config immediately.
 
+```
+config/
+  fish/          shell: config.fish, abbreviations, functions, plugin list
+  nvim/          Neovim: lazy.nvim, LSP, treesitter, formatting
+  tmux/          tmux.conf (XDG location, no Python/powerline dependency)
+  git/           git config, global ignore, commit template
+  starship.toml  prompt
+Brewfile         every package the config expects
+.tool-versions   language versions (mise/asdf format)
+install.sh       idempotent installer
+git_setup.sh     writes your git identity to an untracked local file
+```
 
-## Command Line Tools
-
-Open the Terminal (click the magnifying glass icon in the top right corner of your screen and type `Terminal`):
-
-![](images/open-terminal.png)
-
-Copy-paste the following command in the terminal and hit Enter.
+## Install
 
 ```bash
-xcode-select --install
+git clone git@github.com:tdeschamps/dotfiles.git ~/code/tdeschamps/dotfiles
+cd ~/code/tdeschamps/dotfiles
+bash install.sh
+bash git_setup.sh
 ```
 
-If you have get following message, you can just skip this step and go to next step.
+`install.sh` installs Homebrew if missing, runs `brew bundle`, links every
+config file, installs fisher and tpm, sets fish as the login shell and syncs
+the Neovim plugins. It backs up anything real that is in the way as
+`<file>.backup`, and re-running it is safe.
 
-```
-# command line tools are already installed, use "Software Update" to install updates
-```
+Then open a new terminal, and inside tmux press `prefix + I` (that is
+`Ctrl-Space` then `Shift-i`) to fetch the tmux plugins.
 
-Otherwise, it will open a window asking you if you want to install some software. Accept and wait. If it fails, try again the command line above, sometimes the Apple servers are overloaded.
+## Languages
 
-![](images/xcode-select-install.png)
+Versions below are the latest stable releases as of **2026-09-01**, and match
+[`.tool-versions`](.tool-versions).
 
-While it's downloading, you can go on with configuring your GitHub account, but **stop** before Homebrew. You'll need the command line tools installed for that step.
-
-
-## Homebrew
-
-On Mac, you need to install [Homebrew](http://brew.sh/) which is a Package Manager.
-It will be used as soon as we need to install some software.
-To do so, open your Terminal and run:
+| Language   | Version  | Manager            |
+| ---------- | -------- | ------------------ |
+| Ruby       | 4.0.6    | rbenv              |
+| Node.js    | 26.8.1   | nvm.fish           |
+| Python     | 3.14.7   | pyenv              |
+| Go         | 1.27.0   | Homebrew           |
+| Rust       | 1.98.0   | rustup             |
+| Elixir     | 1.20.4   | Homebrew           |
+| PostgreSQL | 18.6     | Homebrew           |
 
 ```bash
-ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+# Ruby
+rbenv install 4.0.6 && rbenv global 4.0.6
+
+# Node — 26.x is the current release line. It becomes Active LTS on
+# 2026-10-28; use 24.20.0 instead if you want LTS today.
+nvm install 26.8.1 && set -U nvm_default_version 26.8.1
+
+# Python
+pyenv install 3.14.7 && pyenv global 3.14.7
+
+# Rust
+rustup default stable   # 1.98.0
+
+# PostgreSQL
+brew services start postgresql@18
 ```
 
-This will ask for your confirmation (hit `Enter`) and your laptop session password.
+`brew bundle` already installs Go, Elixir, PostgreSQL 18 and rustup.
 
-If you already have Homebrew, it will tell you so, that's fine, go on.
-
-Then install some useful software:
+If you would rather have one tool manage all of them, `mise` reads
+`.tool-versions` directly:
 
 ```bash
-brew update
+brew install mise && mise install
 ```
 
-If you get a `/usr/local must be writable` error, just run this:
+### Ruby gems
 
 ```bash
-sudo chown -R $USER:admin /usr/local
-brew update
+gem install bundler rspec rubocop pry pry-byebug debug
 ```
 
-Error message or not, proceed running the following in the terminal (you can copy / paste all the lines at once).
-
-```bash
-function install_or_upgrade { brew ls | grep $1 > /dev/null; if (($? == 0)); then brew upgrade $1; else brew install $1; fi }
-install_or_upgrade "git"
-install_or_upgrade "wget"
-install_or_upgrade "imagemagick"
-install_or_upgrade "jq"
-install_or_upgrade "openssl"
-```
-
-
-## Sublime Text 3 - Your text editor
-
-A text editor is one of the most important tools of a developer. Go to [this page](http://www.sublimetext.com/3) and download **Sublime Text 3** for OS X. Install it (double click the downloaded file and drag & drop the app **into** the `Applications` folder, **don't skip this**). If you had Sublime Text 2 installed before, please uninstall it (by dragging/dropping it to the Trash).
-
-Sublime Text is free without any time limitation but a popup will appear every ten saves to remind you there is a license to buy. You can hit `Esc` when this happens, but feel free to buy Sublime Text if you really like this one (there are alternatives).
-
-Again, make sure that Sublime Text is there, not in the disk image you downloaded. To make sure it's correct, once Sublime Text is installed, unmount the "Sublime Text 3" disk in the left panel of Finder. Finder will complain if something went wrong. Ask a teacher.
-
-
-
-## Oh-my-zsh - Fancy your Terminal
-
-We will use the shell named `zsh` instead of `bash`, the default one.
-
-```bash
-curl -L http://install.ohmyz.sh | sh
-```
-
-Be careful, at the end of this script, it will prompt for your laptop password again. You have to write it correctly (you will not see it when you type) and hit `Enter`. You should get something like:
-
-```bash
-         __                                     __
-  ____  / /_     ____ ___  __  __   ____  _____/ /_
- / __ \/ __ \   / __ `__ \/ / / /  /_  / / ___/ __ \
-/ /_/ / / / /  / / / / / / /_/ /    / /_(__  ) / / /
-\____/_/ /_/  /_/ /_/ /_/\__, /    /___/____/_/ /_/
-                        /____/                       ....is now installed!
-````
-
-Now quit the Terminal (`⌘` + `Q`), and restart it.
-
-You should see something like this:
-
-![](images/on-my-zsh.png)
-
-If not, **stop right away** and call a teacher.
-
-On Mac, open `Terminal > Preferences` and set the "Pro" theme as default in `Profiles` (*`Réglages`* in French).
-
-![](images/terminal-pro.png)
-
-Quit and relaunch the Terminal. It should now have a nice black background, more easy on the eyes.
-
-
-## GitHub
-
-We need to generate SSH keys which are going to be used by GitHub and Heroku
-to authenticate you. Think of it as a way to log in, but different from the
-well known username/password couple. If you already generated keys
-that you already use with other services, you can skip this step.
-
-Open a terminal and type this, replacing the email with **yours** (the
-same one you used to create your GitHub account). It will prompt
-for information. Just press enter until it asks for a **passphrase**.
-
-**NB:** when asked for a passphrase, put something you want (and that you'll remember),
-it's a password to protect your private key stored on your hard drive. You'll type,
-nothing will show up on the screen, **that's normal**. Just type the passphrase,
-and when you're done, press Enter.
-
-```bash
-mkdir -p ~/.ssh && ssh-keygen -t rsa -C "your_email@example.com"
-```
-
-Then you need to give your **public** key to GitHub. Run:
-
-```bash
-cat ~/.ssh/id_rsa.pub
-```
-
-It will prompt on the screen the content of the `id_rsa.pub` file. Copy that text,
-then go to [github.com/settings/ssh](https://github.com/settings/ssh). Click on
-**Add SSH key**, fill in the Title with your computer name, and paste the **Key**.
-Finish by clicking on the **Add key** green button.
-
-To check that this step is completed, in the terminal run this. You will be
-prompted a warning, type `yes` then `Enter`.
-
-```bash
-ssh -T git@github.com
-```
-
-If you see something like this, you're done!
-
-```bash
-# Hi --------! You've successfully authenticated, but GitHub does not provide shell access
-```
-
-If it does not work, try running this before trying again the `ssh -T` command:
-
-```bash
-ssh-add ~/.ssh/id_rsa
-```
-
-Don't be in a rush, take time to [read this article](http://sebastien.saunier.me/blog/2015/05/10/github-public-key-authentication.html) to get a better
-understanding of what those keys are used for.
-
-
-## Dotfiles (Standard configuration)
-
-Hackers love to refine and polish their shell and tools. We'll start with a great default configuration provided by [Le Wagon](http://github.com/lewagon/dotfiles), stored on GitHub. As your configuration is personal, you need your own repository storing it, so you first need to fork it to your GitHub account.
-
-:arrow_right: [Click here to **fork**](https://github.com/lewagon/dotfiles/fork) the `lewagon/dotfiles` repository to your account. Forking means that it will create a new repo in your GitHub account, identical to the original one. You'll have a new repository on your GitHub account, `your_github_username/dotfiles`. We need to fork because each of you will need to put specific information (e.g. your name) in those files.
-
-Open your terminal. **Don't blindly copy paste this line**, replace `replace_this_with_your_github_username` with *your*
-own github usernickname.
-
-```bash
-export GITHUB_USERNAME=replace_this_with_your_github_username
-
-# Example:
-#   export GITHUB_USERNAME=ssaunier
-```
-
-Now copy/paste this very long line in your terminal. Do **not** change this one.
-
-```bash
-mkdir -p ~/code/$GITHUB_USERNAME && cd $_ && git clone git@github.com:$GITHUB_USERNAME/dotfiles.git
-```
-
-Run the `dotfiles` installer.
-
-```bash
-cd ~/code/$GITHUB_USERNAME/dotfiles
-zsh install.sh
-```
-
-Then run the git installer:
-
-```bash
-cd ~/code/$GITHUB_USERNAME/dotfiles
-zsh git_setup.sh
-```
-
-☝ This will **prompt** you for your name (`Firstname Lastname`) and your email.
-
-Be careful, you **need** to put the **same** email as the one you sign up with on GitHub.
-
-Please now **quit** all your opened terminal windows.
-
-### Sublime Text auto-configuration
-
-Open a new terminal and type this:
-
-```bash
-stt
-```
-
-It will **open Sublime Text in the context of your current folder**. That's how we'll use it.
-
-**Wait 1 minute** for additional packages to be automatically installed (New tabs with text will automatically open, containing documentation for each new package installed).
-
-To check if plugins are installed, open the Command Palette (`⌘` + `⇧` + `P` on OSX, `Ctrl` + `⇧` + `P` on Linux), type in `Packlist` and then `Enter`, you should see a couple of packages installed (like [Emmet](http://emmet.io/)).
-
-If you don't, please install all of them manually. The list is referenced [here](https://github.com/lewagon/dotfiles/blob/master/Package%20Control.sublime-settings).
-
-
-
-
-## Installing Ruby (with [rbenv](https://github.com/sstephenson/rbenv))
-
-First we need to clean up any previous Ruby installation you might have:
-
-```bash
-rvm implode && sudo rm -rf ~/.rvm
-# If you got "zsh: command not found: rvm", carry on. It means `rvm` is not
-# on your computer, that's what we want!
-
-sudo rm -rf $HOME/.rbenv /usr/local/rbenv /opt/rbenv /usr/local/opt/rbenv
-```
-
-Now let's get `rbenv` and `ruby-build` packages from Homebrew, they'll be useful.
-
-```bash
-brew uninstall --force rbenv ruby-build
-unset RBENV_ROOT && source ~/.zshrc
-brew install rbenv ruby-build && source ~/.zshrc
-```
-
-
-Now, you are ready to install the latest ruby version, and set it as the default version.
-
-Run this command, it will **take a while (5-10 minutes)**
-
-```bash
-rbenv install 2.3.1
-```
-
-Once the ruby installation is done, run this command tell the system
-to use the 2.3.1 version by default.
-
-```bash
-rbenv global 2.3.1
-```
-
-Then **restart** your Terminal (close it and reopen it).
-
-```bash
-ruby -v
-```
-
-You should see something starting with `ruby 2.3.1p`. If not, ask a teacher.
-
-## Installing some gems
-
-```bash
-gem install bundler rspec rubocop pry pry-byebug hub colored gist
-```
-
-**Never** install a gem with `sudo gem install`! Even if you stumble upon a Stackoverflow answer
-(or the Terminal) telling you to do so.
-
-
-## Postgresql
-
-In a few weeks, we'll talk about SQL and Databases and you'll need something called Postgresql,
-an open-source robust and production-ready database. Let's install it now.
-
-```bash
-brew install postgresql
-brew services start postgresql
-```
-
-Once you've done that, let's check if it worked:
-
-```bash
-psql -d postgres
-```
-
-If you enter a new prompt like this one, you're good!
-
-```bash
-psql (9.5.3)
-Type "help" for help.
-
-postgres=#
-```
-
-To quit it, type `\q` then `Enter`.
-
-
-## Security
-
-It is mandataory that you protect your session behind a password.If it is not already the case, go to ` > System Preferences > Users & Groups`, and change your account password. You should also go to ` > System Preferences > Security > General`. You should require a password `5 seconds` after sleep or screen saver begins.
-
-You can also go to ` > System Preferences > Mission Control`, and click on the `Hot Corners` button at the bottom left. Choose for the bottom right corner to start the screen saver. That way, when you leave your desk, you can quickly lock you screen by putting your mouse in the bottom right corner. 5 seconds after, your Macbook will be locked and will ask for a password to get back on the session.
-
-## Check-up
-
-Let's check if you successfully installed everything.
-
-Quit all opened Terminal, open a new one and run the following commands:
-
-```bash
-gist --login
-# This will ask for you GitHub nickname and password. You can type them.
-
-curl -Ls https://raw.githubusercontent.com/lewagon/setup/master/check.rb | ruby
-```
-
-It should tell you if your workstation is ready :) If not, ask a teacher. If you don't want
-your email to appear on your GitHub profile, you can now revert the `Public email` setting.
-
-## Keyboard
-
-As you become a programer, you'll understand that leaving the keyboard takes a lot of time,
-so you'll want to minimize using the trackpad or the mouse. Here are a few tricks on OSX
-to help you do that:
-
-### Keyboard speed
-
-Go to  > System Preferences > Keyboard. Set `Key Repeat` to the fastest position (to the right) and
-`Delay Until Repeat` to the shortest position (to the right).
-
-### Full Keyboard Access
-
-Go to  > System Preferences > Keyboard. Click on the third tab (Shortcuts). At the bottom of the
-pane, click the radio button `All controls`. This way when you get a dialog with several options,
-you'll be able to type `Enter` to confirm, or `Space` to choose the cancel option. If you have more than
-two options, you can use tab to circle between them.
-
-### OSX For hackers
-
-[Read this script](https://gist.github.com/brandonb927/3195465) and cherry-pick some stuff you think will suit you.
-For instance, you can type in the terminal this one:
-
-```bash
-# Expanding the save panel by default
-defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
-defaults write NSGlobalDomain PMPrintingExpandedStateForPrint -bool true
-defaults write NSGlobalDomain PMPrintingExpandedStateForPrint2 -bool true
-
-# Disable system-wide resume
-defaults write com.apple.systempreferences NSQuitAlwaysKeepsWindows -bool false
-
-# etc..
-```
-
+Never use `sudo gem install`, whatever Stack Overflow says.
+
+## fish
+
+The shell config lives in `config/fish`.
+
+- `config.fish` — locale, Homebrew, `PATH`, editor, version managers, fzf,
+  prompt and colours. Interactive-only settings are behind
+  `status is-interactive` so scripts start fast.
+- `conf.d/abbr.fish` — Homebrew, Docker Compose and bundler abbreviations.
+- `conf.d/git.abbr.fish` — the git shorthands. These are **abbreviations**, not
+  aliases: they expand in place as you type, so `Ctrl-R` history shows the real
+  command. `gcm`, `gmom` and `grbm` resolve the repo's actual default branch at
+  expansion time instead of assuming `master`.
+- `conf.d/aliases.fish`, `functions/` — `ls`/`ll` via eza, `serve`, `myip`,
+  `localips`, and `stt` (which now opens Neovim).
+
+Plugins are managed by [fisher](https://github.com/jorgebucaran/fisher) and
+listed in `fish_plugins`. Add one with `fisher install owner/repo`, then commit
+the updated `fish_plugins`.
+
+## Neovim
+
+`config/nvim` is a [lazy.nvim](https://github.com/folke/lazy.nvim) setup.
+Leader is `<Space>`.
+
+| Area          | Plugin                                     |
+| ------------- | ------------------------------------------ |
+| Plugin manager| lazy.nvim                                  |
+| Colours       | gruvbox.nvim (hard contrast)               |
+| Finder        | Telescope (`<C-p>`, `<leader>f…`)          |
+| File tree     | neo-tree (`<C-n>`)                         |
+| Syntax        | nvim-treesitter                            |
+| LSP           | nvim-lspconfig + mason.nvim                |
+| Completion    | blink.cmp                                  |
+| Formatting    | conform.nvim (format on save)              |
+| Linting       | nvim-lint                                  |
+| Git           | gitsigns.nvim, vim-fugitive                |
+| Status line   | lualine + bufferline                       |
+
+Useful commands: `:Lazy` (plugins), `:Mason` (LSP servers), `:ConformInfo`
+(formatters), `:checkhealth`.
+
+Format on save can be turned off with `:FormatDisable` (add `!` for the current
+buffer only) and back on with `:FormatEnable`.
+
+## git
+
+`config/git/config` is the tracked global config. Your name and email are
+**not** in it — `git_setup.sh` writes them to `~/.config/git/config.local`,
+which the tracked config `[include]`s and `.gitignore` excludes.
+
+Notable settings: `init.defaultBranch = main`, `push.autoSetupRemote`,
+`fetch.prune`, `rebase.autoStash`, `rerere.enabled`, `merge.conflictstyle =
+zdiff3`, and [delta](https://github.com/dandavison/delta) as the pager.
+
+If `~/.gitconfig` exists it silently overrides all of this — remove it.
+
+## What changed in the 2026 refresh
+
+This repo started as a fork of `lewagon/dotfiles` and had not been touched
+since 2020. The rewrite:
+
+- **Shell** — dropped zsh and oh-my-zsh; fish is the only shell. Fixed the
+  `PATH` handling (it was one colon-joined string), added `brew shellenv` so
+  Apple Silicon works, and removed the `set -x TERM xterm-256color` override
+  that was breaking true colour.
+- **Editor** — replaced Sublime Text and the 28 vim submodules with a Neovim
+  config. `stt` opens Neovim; the TextMate `tm_properties` file is gone.
+- **fisher** — the vendored copy was v3.3.1 and installed itself from
+  `git.io`, which GitHub shut down in 2022. `fishfile` is now `fish_plugins`.
+- **Version managers** — dropped the vendored 2013 rbenv fish shims and
+  `fast-nvm-fish` in favour of `rbenv init - fish`, `pyenv init - fish` and
+  `nvm.fish`.
+- **Docker** — `docker-compose` v1 reached end of life in July 2023; the
+  abbreviations and completions now use `docker compose`.
+- **tmux** — the config pointed at a powerline install inside a hardcoded
+  `pyenv 3.8.2` path. Status line is now plain tmux formatting with no Python
+  dependency, `default-terminal` is `tmux-256color`, and
+  `reattach-to-user-namespace` is gone (unnecessary since macOS 10.12).
+- **install.sh** — installed Homebrew with `/usr/bin/ruby` (removed from macOS
+  in Monterey), used `brew install vim --override-system-vi` (flag long gone),
+  cloned over the `git://` protocol (disabled by GitHub in 2021), appended to
+  its own tracked `zshrc` on every run, and never linked `config/` at all — so
+  the fish config was never actually installed. All fixed.
+- **git** — `commit.template` referenced a `gitmessage` file that did not exist
+  in the repo. It does now. `diff-so-fancy` became delta, gitignore.io links
+  point at their current home, and the hardcoded identity moved out of the
+  tracked file.
+- **Tools** — `ag` to ripgrep, `z`/autojump to zoxide, `lsd` to eza, powerline
+  to starship.
