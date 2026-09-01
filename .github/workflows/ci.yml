@@ -1,0 +1,217 @@
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  # Upstream moves even when this repo does not; a weekly run catches a plugin
+  # or API change before the next time these dotfiles get installed.
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  shell:
+    name: shell and config syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -q fish shellcheck tmux openssh-client
+
+      - name: shellcheck
+        run: shellcheck install.sh git_setup.sh
+
+      - name: fish syntax
+        run: |
+          status=0
+          while IFS= read -r file; do
+            if fish --no-execute "$file"; then
+              echo "ok    $file"
+            else
+              echo "FAIL  $file"
+              status=1
+            fi
+          done < <(find config/fish -name '*.fish' | sort)
+          exit $status
+
+      - name: fish config loads and abbreviations register
+        run: |
+          export HOME="$RUNNER_TEMP/home"
+          export XDG_CONFIG_HOME="$HOME/.config"
+          mkdir -p "$XDG_CONFIG_HOME/fish/conf.d" "$XDG_CONFIG_HOME/fish/functions"
+          cp config/fish/config.fish "$XDG_CONFIG_HOME/fish/"
+          cp config/fish/conf.d/*.fish "$XDG_CONFIG_HOME/fish/conf.d/"
+          cp config/fish/functions/*.fish "$XDG_CONFIG_HOME/fish/functions/"
+          cat > /tmp/check.fish <<'FISH'
+          source $HOME/.config/fish/config.fish
+          for f in $HOME/.config/fish/conf.d/*.fish
+              string replace -r '^status is-interactive; or exit$' '' < $f | source
+          end
+          set -l n (abbr --list | count)
+          echo "abbreviations: $n"
+          test $n -gt 100; or begin; echo "too few abbreviations"; exit 1; end
+          for fn in git_main_branch serve myip localips stt
+              functions -q $fn; or begin; echo "missing function: $fn"; exit 1; end
+          end
+          echo "fish config OK"
+          FISH
+          fish /tmp/check.fish
+
+      - name: tmux config parses
+        run: |
+          tmux -f config/tmux/tmux.conf -L ci new-session -d -s probe
+          test "$(tmux -L ci show-options -gv default-terminal)" = "tmux-256color"
+          tmux -L ci kill-server
+          echo "tmux config OK"
+
+      - name: ssh config parses
+        run: |
+          ssh -F config/ssh/config -G github.com > /tmp/ssh-github
+          grep -qx "user git" /tmp/ssh-github
+          grep -qx "identitiesonly yes" /tmp/ssh-github
+          # IdentitiesOnly must stay scoped to github, not leak to every host
+          ssh -F config/ssh/config -G example.com | grep -qx "identitiesonly no"
+          echo "ssh config OK"
+
+      - name: git config parses and identity resolves through the include
+        run: |
+          export HOME="$RUNNER_TEMP/githome"
+          export XDG_CONFIG_HOME="$HOME/.config"
+          mkdir -p "$XDG_CONFIG_HOME/git"
+          cp config/git/config config/git/gitignore config/git/gitmessage "$XDG_CONFIG_HOME/git/"
+          printf 'CI User\nci@example.com\n' | bash git_setup.sh > /dev/null
+          test "$(git config user.email)" = "ci@example.com"
+          # commit.template points at a file that must actually exist
+          test -f "$XDG_CONFIG_HOME/git/gitmessage"
+          # `git main` must never print an empty line
+          repo=$(mktemp -d); git -C "$repo" init -q
+          test -n "$(git -C "$repo" -c core.pager=cat main)"
+          echo "git config OK"
+
+      - name: data files are valid
+        run: |
+          python3 -c "import json; json.load(open('config/nvim/lazyvim.json'))"
+          python3 -c "import json; json.load(open('config/nvim/lazy-lock.json'))"
+          python3 -c "import json; json.load(open('config/nvim/.neoconf.json'))"
+          python3 -c "import tomllib; tomllib.load(open('config/starship.toml','rb'))"
+          echo "data files OK"
+
+      - name: installer links files idempotently
+        run: |
+          export HOME="$RUNNER_TEMP/linkhome"
+          export XDG_CONFIG_HOME="$HOME/.config"
+          mkdir -p "$HOME"
+          # Run only the linking section: brew, chsh and nvim need a real machine.
+          {
+            sed -n '1,/^# link <source-in-repo>/p' install.sh | head -n -1
+            echo "DOTFILES=\"$PWD\""
+            sed -n '/^link() {/,/^}/p' install.sh
+            sed -n '/^# 2. Symlinks/,/^# 3. fish plugins/p' install.sh | head -n -2
+          } > /tmp/linkonly.sh
+          bash /tmp/linkonly.sh
+          test -L "$XDG_CONFIG_HOME/fish/config.fish"
+          test -L "$XDG_CONFIG_HOME/nvim"
+          test -L "$HOME/.ssh/config"
+          test "$(stat -c '%a' "$HOME/.ssh")" = "700"
+          # Second run must be a no-op
+          test -z "$(bash /tmp/linkonly.sh | grep linked || true)"
+          echo "installer OK"
+
+  neovim:
+    name: neovim bootstraps
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: stable
+
+      - name: Install LazyVim's runtime dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -q ripgrep fd-find
+          npm install -g tree-sitter-cli
+
+      - name: Bootstrap from an empty config
+        env:
+          XDG_CONFIG_HOME: ${{ runner.temp }}/nvim-config
+          XDG_DATA_HOME: ${{ runner.temp }}/nvim-data
+          XDG_STATE_HOME: ${{ runner.temp }}/nvim-state
+          XDG_CACHE_HOME: ${{ runner.temp }}/nvim-cache
+        run: |
+          mkdir -p "$XDG_CONFIG_HOME"
+          ln -s "$PWD/config/nvim" "$XDG_CONFIG_HOME/nvim"
+          # A cold sync races Mason over tree-sitter-cli; the second pass settles
+          # it. This mirrors what install.sh does.
+          nvim --headless "+Lazy! sync" +qa > /dev/null 2>&1 || true
+          nvim --headless "+Lazy! sync" +qa
+
+      - name: A clean start must produce no errors
+        env:
+          XDG_CONFIG_HOME: ${{ runner.temp }}/nvim-config
+          XDG_DATA_HOME: ${{ runner.temp }}/nvim-data
+          XDG_STATE_HOME: ${{ runner.temp }}/nvim-state
+          XDG_CACHE_HOME: ${{ runner.temp }}/nvim-cache
+        run: |
+          nvim --headless -c 'qa' 2>&1 | tee /tmp/start.log
+          if grep -qiE 'E5108|E5113|Failed to run|Error detected' /tmp/start.log; then
+            echo "::error::Neovim reported errors on a clean start"
+            exit 1
+          fi
+          echo "clean start OK"
+
+      - name: Extras are live
+        env:
+          XDG_CONFIG_HOME: ${{ runner.temp }}/nvim-config
+          XDG_DATA_HOME: ${{ runner.temp }}/nvim-data
+          XDG_STATE_HOME: ${{ runner.temp }}/nvim-state
+          XDG_CACHE_HOME: ${{ runner.temp }}/nvim-cache
+        run: |
+          printf 'class Foo\n  def bar; end\nend\n' > /tmp/probe.rb
+          cat > /tmp/probe.lua <<'LUA'
+          vim.api.nvim_exec_autocmds("User", { pattern = "VeryLazy", modeline = false })
+          vim.wait(2000)
+
+          -- Compare against lazyvim.json rather than a hardcoded number, so
+          -- toggling an extra with :LazyExtras does not break CI.
+          local declared = vim.json.decode(
+            table.concat(vim.fn.readfile(vim.fn.stdpath("config") .. "/lazyvim.json"), "\n")
+          ).extras
+          local loaded = require("lazyvim.config").json.data.extras
+
+          local missing = {}
+          for name, p in pairs(require("lazy.core.config").plugins) do
+            if not p._.installed then table.insert(missing, name) end
+          end
+
+          local problems = {}
+          if #loaded ~= #declared then
+            table.insert(problems, ("extras loaded %d, declared %d"):format(#loaded, #declared))
+          end
+          if #missing > 0 then
+            table.insert(problems, "not installed: " .. table.concat(missing, ","))
+          end
+          if vim.fn.exists(":LazyExtras") ~= 2 then
+            table.insert(problems, ":LazyExtras missing")
+          end
+
+          -- Smoke-test that formatting is wired at all. Deliberately not
+          -- per-language: LazyVim routes some languages (rust, python) through
+          -- their LSP instead of conform, and that is its call to change.
+          local formatted_fts = vim.tbl_count(require("conform").formatters_by_ft)
+          if formatted_fts < 10 then
+            table.insert(problems, ("only %d filetypes have formatters"):format(formatted_fts))
+          end
+
+          io.stdout:write(("extras=%d plugins=%d formatted_fts=%d -> %s\n"):format(
+            #loaded, vim.tbl_count(require("lazy.core.config").plugins), formatted_fts,
+            #problems == 0 and "PASS" or "FAIL: " .. table.concat(problems, "; ")))
+          LUA
+          nvim --headless /tmp/probe.rb -c 'luafile /tmp/probe.lua' -c 'qa' 2>&1 | tee /tmp/probe.log
+          grep -q "PASS" /tmp/probe.log

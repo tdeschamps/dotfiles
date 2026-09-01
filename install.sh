@@ -108,9 +108,15 @@ link "config/git/gitmessage" "$XDG_CONFIG_HOME/git/gitmessage"
 link "config/git/gitk" "$XDG_CONFIG_HOME/git/gitk"
 
 if [ -f "$HOME/.gitconfig" ] && [ ! -L "$HOME/.gitconfig" ]; then
-  warn "~/.gitconfig exists and takes precedence over ~/.config/git/config."
+  warn "$HOME/.gitconfig exists and takes precedence over the config linked above."
   warn "Merge anything you still need out of it, then remove it."
 fi
+
+# ssh. The directory must be 0700 and ControlPath needs its parent to exist;
+# ssh creates neither.
+mkdir -p "$HOME/.ssh/control"
+chmod 700 "$HOME/.ssh" "$HOME/.ssh/control"
+link "config/ssh/config" "$HOME/.ssh/config"
 
 # ruby
 link "gemrc" "$HOME/.gemrc"

@@ -9,7 +9,11 @@ config/fish/fish_variables
 config/nvim/plugin/
 config/tmux/plugins/
 
-# Machine-local git identity, written by git_setup.sh
+# Machine-local git identity and signing, written by git_setup.sh
 config/git/config.local
+config/git/allowed_signers
+
+# Machine-local ssh hosts
+config/ssh/config.local
 
 .DS_Store

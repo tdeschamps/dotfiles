@@ -11,9 +11,11 @@ config/
   nvim/          Neovim: plain LazyVim + language extras
   tmux/          tmux.conf (XDG location, no Python/powerline dependency)
   git/           git config, global ignore, commit template
+  ssh/           ssh client config
   starship.toml  prompt
 Brewfile         every package the config expects
 .tool-versions   language versions (mise/asdf format)
+.github/         CI: syntax checks and a full LazyVim bootstrap
 install.sh       idempotent installer
 git_setup.sh     writes your git identity to an untracked local file
 ```
@@ -28,8 +30,9 @@ bash git_setup.sh
 ```
 
 `install.sh` installs Homebrew if missing, runs `brew bundle`, links every
-config file, installs fisher and tpm, sets fish as the login shell and syncs
-the Neovim plugins. It backs up anything real that is in the way as
+config file (including `~/.ssh/config`), installs fisher and tpm, sets fish as
+the login shell and syncs the Neovim plugins. `git_setup.sh` then sets your git
+identity and, if you have an SSH key, offers to enable commit signing. It backs up anything real that is in the way as
 `<file>.backup`, and re-running it is safe.
 
 Then open a new terminal, and inside tmux press `prefix + I` (that is
@@ -161,6 +164,51 @@ Notable settings: `init.defaultBranch = main`, `push.autoSetupRemote`,
 zdiff3`, and [delta](https://github.com/dandavison/delta) as the pager.
 
 If `~/.gitconfig` exists it silently overrides all of this — remove it.
+
+### Commit signing
+
+`git_setup.sh` also offers to turn on SSH commit signing, using the first key it
+finds in `~/.ssh`. It writes `user.signingkey` and `commit.gpgsign` to
+`config.local` and adds your key to `~/.config/git/allowed_signers` so
+`git log --show-signature` can verify your own commits.
+
+Only `gpg.format = ssh` is tracked, so a machine with no signing key still
+commits normally. After enabling it, add the same key to GitHub as a **signing**
+key — that is a separate entry from the authentication key.
+
+## ssh
+
+`config/ssh/config` becomes `~/.ssh/config`. It enables `AddKeysToAgent`,
+`UseKeychain` on macOS (guarded by `IgnoreUnknown`, so the same file parses on
+Linux), keepalives, and connection multiplexing.
+
+`IdentitiesOnly` is scoped to `github.com` rather than `Host *`, so other hosts
+can still authenticate from the agent.
+
+Machine-specific and work hosts go in `~/.ssh/config.local`, which is included
+first — ssh takes the first value it sees for each option, so anything there
+wins. That file is not tracked.
+
+Generate a key on a new machine with:
+
+```bash
+ssh-keygen -t ed25519 -C "your@email"
+```
+
+## CI
+
+`.github/workflows/ci.yml` runs on every push and weekly on a schedule, because
+upstream moves even when this repo does not.
+
+- **shell** — shellcheck, `fish --no-execute` on every fish file, then a real
+  fish load asserting the abbreviations and functions register; tmux, ssh and
+  git configs are parsed by their own tools; JSON and TOML are validated; and
+  the installer's linking is checked for correctness and idempotency.
+- **neovim** — bootstraps LazyVim from an empty config, asserts a clean second
+  start, and checks that every declared extra loaded and every plugin installed.
+
+The weekly run is the point: it catches a plugin breaking its API before the
+next time you install these dotfiles somewhere.
 
 ## What changed in the 2026 refresh
 

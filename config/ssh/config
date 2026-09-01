@@ -1,0 +1,30 @@
+# ~/.ssh/config
+#
+# ssh uses the FIRST value it finds for each option, so machine-specific and
+# work hosts go in ~/.ssh/config.local and this include stays at the top.
+Include ~/.ssh/config.local
+
+Host github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519
+  # Offer only the key named above rather than every key in the agent, which
+  # avoids "Too many authentication failures" once you have a few.
+  IdentitiesOnly yes
+
+Host *
+  # Load a key into the agent the first time it is used.
+  AddKeysToAgent yes
+
+  # macOS stores the passphrase in the Keychain. IgnoreUnknown keeps this file
+  # portable: without it, ssh on Linux fails on the unknown UseKeychain keyword.
+  IgnoreUnknown UseKeychain
+  UseKeychain yes
+
+  # Keep long-lived connections (and port forwards) from being dropped.
+  ServerAliveInterval 60
+  ServerAliveCountMax 3
+
+  # Reuse one TCP connection for repeated sessions to the same host.
+  ControlMaster auto
+  ControlPath ~/.ssh/control/%C
+  ControlPersist 10m
