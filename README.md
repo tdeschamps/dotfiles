@@ -8,7 +8,7 @@ here changes the live config immediately.
 ```
 config/
   fish/          shell: config.fish, abbreviations, functions, plugin list
-  nvim/          Neovim: lazy.nvim, LSP, treesitter, formatting
+  nvim/          Neovim: plain LazyVim + language extras
   tmux/          tmux.conf (XDG location, no Python/powerline dependency)
   git/           git config, global ignore, commit template
   starship.toml  prompt
@@ -106,28 +106,49 @@ the updated `fish_plugins`.
 
 ## Neovim
 
-`config/nvim` is a [lazy.nvim](https://github.com/folke/lazy.nvim) setup.
-Leader is `<Space>`.
+`config/nvim` is a plain [LazyVim](https://www.lazyvim.org) install — the
+upstream starter, unmodified. There is no hand-written plugin configuration to
+maintain: LazyVim owns the defaults, and `:Lazy update` picks up upstream fixes
+when a plugin changes its API.
 
-| Area          | Plugin                                     |
-| ------------- | ------------------------------------------ |
-| Plugin manager| lazy.nvim                                  |
-| Colours       | gruvbox.nvim (hard contrast)               |
-| Finder        | Telescope (`<C-p>`, `<leader>f…`)          |
-| File tree     | neo-tree (`<C-n>`)                         |
-| Syntax        | nvim-treesitter                            |
-| LSP           | nvim-lspconfig + mason.nvim                |
-| Completion    | blink.cmp                                  |
-| Formatting    | conform.nvim (format on save)              |
-| Linting       | nvim-lint                                  |
-| Git           | gitsigns.nvim, vim-fugitive                |
-| Status line   | lualine + bufferline                       |
+Leader is `<Space>`. Press it and wait for which-key to show what is available,
+or `<leader>sk` to search every keymap.
 
-Useful commands: `:Lazy` (plugins), `:Mason` (LSP servers), `:ConformInfo`
-(formatters), `:checkhealth`.
+Three commands worth knowing:
 
-Format on save can be turned off with `:FormatDisable` (add `!` for the current
-buffer only) and back on with `:FormatEnable`.
+| Command | What it does |
+| --- | --- |
+| `:LazyExtras` | Browse and toggle language/tooling modules |
+| `:Lazy` | Plugin manager — update, profile, debug |
+| `:LazyHealth` | Check that everything LazyVim needs is present |
+
+### Enabled extras
+
+Recorded in `config/nvim/lazyvim.json`, which `:LazyExtras` rewrites when you
+toggle a module. Fifteen are on:
+
+- **Languages** — ruby, elixir, go, rust, typescript, python, json, yaml, sql,
+  docker, markdown, git
+- **Tooling** — prettier (formatting), eslint (linting)
+- **Editing** — mini-surround, because the old vimrc used vim-surround
+
+Everything else is LazyVim's default: snacks.nvim for the picker, explorer and
+dashboard, blink.cmp for completion, tokyonight for colours, conform.nvim and
+nvim-lint wired up per language, mason.nvim for the servers.
+
+Adding a language is `:LazyExtras`, toggle, restart — then commit the changed
+`lazyvim.json` and `lazy-lock.json`.
+
+### Local changes
+
+`lua/plugins/overrides.lua` is where your own specs go; it is merged on top of
+LazyVim's. `lua/config/{options,keymaps,autocmds}.lua` are loaded automatically
+and are intentionally empty. Nothing from the old vim setup was carried over —
+LazyVim's own keymaps replace it.
+
+Some servers and formatters Mason installs (`ts_ls`, `jsonls`, `eslint`,
+`prettier`, `markdownlint`) need Node on `PATH`, so install a Node version
+before first launch.
 
 ## git
 
@@ -150,8 +171,9 @@ since 2020. The rewrite:
   `PATH` handling (it was one colon-joined string), added `brew shellenv` so
   Apple Silicon works, and removed the `set -x TERM xterm-256color` override
   that was breaking true colour.
-- **Editor** — replaced Sublime Text and the 28 vim submodules with a Neovim
-  config. `stt` opens Neovim; the TextMate `tm_properties` file is gone.
+- **Editor** — replaced Sublime Text and the 28 vim submodules with a plain
+  LazyVim install. `stt` opens Neovim; the TextMate `tm_properties` file is
+  gone.
 - **fisher** — the vendored copy was v3.3.1 and installed itself from
   `git.io`, which GitHub shut down in 2022. `fishfile` is now `fish_plugins`.
 - **Version managers** — dropped the vendored 2013 rbenv fish shims and

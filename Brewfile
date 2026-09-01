@@ -7,9 +7,11 @@ brew "fish"
 brew "starship"      # prompt (replaces powerline)
 brew "tmux"
 
-# Editor
+# Editor. LazyVim wants ripgrep, fd, lazygit and a Nerd Font (all below);
+# tree-sitter-cli is required by nvim-treesitter's main branch.
 brew "neovim"
 brew "lazygit"
+brew "tree-sitter-cli"
 
 # Core CLI
 brew "git"
@@ -50,8 +52,8 @@ brew "zlib"
 brew "postgresql@18"
 brew "redis"
 
-# Formatters and linters used by Neovim's conform.nvim / nvim-lint
-brew "stylua"
+# Formatters and linters. Neovim gets its own copies through Mason, so these
+# are only the ones worth having on PATH outside the editor.
 brew "shellcheck"
 brew "ruff"
 

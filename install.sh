@@ -154,10 +154,11 @@ if [ -n "$FISH_PATH" ]; then
   if [ "${SHELL:-}" != "$FISH_PATH" ]; then
     if ! grep -qxF "$FISH_PATH" /etc/shells 2>/dev/null; then
       info "adding $FISH_PATH to /etc/shells (sudo required)"
-      echo "$FISH_PATH" | sudo tee -a /etc/shells >/dev/null
+      echo "$FISH_PATH" | sudo tee -a /etc/shells >/dev/null \
+        || warn "could not write /etc/shells; set your shell manually"
     fi
     info "setting fish as your login shell"
-    chsh -s "$FISH_PATH"
+    chsh -s "$FISH_PATH" || warn "chsh failed; set fish as your login shell manually"
   else
     info "fish is already your login shell"
   fi
@@ -168,8 +169,13 @@ fi
 #
 step "Neovim"
 if command -v nvim >/dev/null 2>&1; then
-  info "syncing plugins (lazy.nvim bootstraps itself on first run)"
+  info "installing LazyVim and its plugins (this takes a few minutes)"
+  # A cold headless sync races Mason on tree-sitter-cli and prints a harmless
+  # "Package is already installing" trace. A second pass settles it so the
+  # first interactive launch is clean.
+  nvim --headless "+Lazy! sync" +qa >/dev/null 2>&1 || true
   nvim --headless "+Lazy! sync" +qa || warn "plugin sync reported an error; run :Lazy inside nvim"
+  info "run :LazyHealth inside nvim to check for anything missing"
 else
   warn "neovim is not installed; skipping plugin sync"
 fi
