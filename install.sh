@@ -134,6 +134,17 @@ link "config/git/config" "$XDG_CONFIG_HOME/git/config"
 link "config/git/gitignore" "$XDG_CONFIG_HOME/git/gitignore"
 link "config/git/gitmessage" "$XDG_CONFIG_HOME/git/gitmessage"
 
+# git cannot expand $XDG_CONFIG_HOME in a config value, so the tracked file has
+# to hardcode ~/.config. Write the resolved paths into config.local, which the
+# include at the bottom of that file lets win.
+git config --file "$XDG_CONFIG_HOME/git/config.local" \
+  core.excludesfile "$XDG_CONFIG_HOME/git/gitignore"
+git config --file "$XDG_CONFIG_HOME/git/config.local" \
+  commit.template "$XDG_CONFIG_HOME/git/gitmessage"
+git config --file "$XDG_CONFIG_HOME/git/config.local" \
+  gpg.ssh.allowedSignersFile "$XDG_CONFIG_HOME/git/allowed_signers"
+info "wrote resolved git paths to $XDG_CONFIG_HOME/git/config.local"
+
 if [ -f "$HOME/.gitconfig" ] && [ ! -L "$HOME/.gitconfig" ]; then
   warn "$HOME/.gitconfig exists and takes precedence over the config linked above."
   warn "Merge anything you still need out of it, then remove it."
@@ -161,9 +172,11 @@ if command -v fish >/dev/null 2>&1; then
   if [ ! -e "$fisher_fn" ]; then
     info "installing fisher"
     curl -fsSL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish \
-      -o "$fisher_fn"
+      -o "$fisher_fn" || warn "could not download fisher; skipping fish plugins"
   fi
-  fish -c "source $fisher_fn && fisher update"
+  if [ -e "$fisher_fn" ]; then
+    fish -c "source $fisher_fn && fisher update" || warn "fisher update failed; run it yourself later"
+  fi
 else
   warn "fish is not installed; skipping plugin installation"
 fi
@@ -188,8 +201,11 @@ fi
 step "tmux plugins"
 TPM_DIR="$XDG_CONFIG_HOME/tmux/plugins/tpm"
 if [ ! -d "$TPM_DIR" ]; then
-  git clone --depth 1 https://github.com/tmux-plugins/tpm "$TPM_DIR"
-  info "installed tpm — press prefix + I inside tmux to fetch the plugins"
+  if git clone --depth 1 https://github.com/tmux-plugins/tpm "$TPM_DIR"; then
+    info "installed tpm — press prefix + I inside tmux to fetch the plugins"
+  else
+    warn "could not clone tpm; tmux plugins will not load until you retry"
+  fi
 else
   info "tpm already installed"
 fi

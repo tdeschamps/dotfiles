@@ -118,7 +118,7 @@ Everything is managed by [mise](https://mise.jdx.dev) and pinned in
 | Go       | 1.27.0  |
 | Rust     | 1.98.0  |
 
-All seven are mise **core** tools — built into the binary, so there are no
+All five are mise **core** tools — built into the binary, so there are no
 plugins to install.
 
 ```bash
@@ -196,7 +196,7 @@ Three commands worth knowing:
 ### Enabled extras
 
 Recorded in `config/nvim/lazyvim.json`, which `:LazyExtras` rewrites when you
-toggle a module. Fifteen are on:
+toggle a module. Fourteen are on:
 
 - **Languages** — ruby, go, rust, typescript, python, json, yaml, sql,
   docker, markdown, git
@@ -262,6 +262,22 @@ Generate a key on a new machine with:
 ```bash
 ssh-keygen -t ed25519 -C "your@email"
 ```
+
+## Prompt
+
+[starship](https://starship.rs) renders the prompt, configured in
+`config/starship.toml` and linked to `~/.config/starship.toml`. `config.fish`
+initialises it only if the binary is present, so the shell still works without
+it.
+
+The prompt shows directory, git branch and status, the version of whichever
+runtime the project uses, Docker context, Kubernetes context, and command
+duration over two seconds — then `â¯` on its own line, green normally and red after
+a failed command. Kubernetes contexts matching `.*prod.*` render bold red.
+
+Verified with starship 1.26.0: `starship explain` accepts the file, and the
+language modules resolve versions from whatever the active runtime is, which is
+what mise puts on `PATH`.
 
 ## CI
 

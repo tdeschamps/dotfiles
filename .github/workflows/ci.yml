@@ -132,9 +132,26 @@ jobs:
                   problems.append(
                       f"{label[tool]}: config.toml says {version}, README says {row.group(1)}")
 
+          # Counts written out in prose drift too — "All seven" survived two
+          # runtimes being removed because nothing checked it.
+          import json
+          n_tools = len(tools)
+          words = {1:"one",2:"two",3:"three",4:"four",5:"five",6:"six",7:"seven",
+                   8:"eight",9:"nine",10:"ten",11:"eleven",12:"twelve",
+                   13:"thirteen",14:"fourteen",15:"fifteen",16:"sixteen"}
+          if f"All {words[n_tools]} are mise" not in readme:
+              problems.append(
+                  f"README should say 'All {words[n_tools]} are mise **core** tools'")
+
+          n_extras = len(json.load(open("config/nvim/lazyvim.json"))["extras"])
+          if f"{words[n_extras].capitalize()} are on:" not in readme:
+              problems.append(
+                  f"README should say '{words[n_extras].capitalize()} are on:' "
+                  f"for the {n_extras} LazyVim extras")
+
           if problems:
-              sys.exit("version drift:\n  " + "\n  ".join(problems))
-          print(f"{len(tools)} runtimes pinned and consistent with the README")
+              sys.exit("drift:\n  " + "\n  ".join(problems))
+          print(f"{n_tools} runtimes and {n_extras} extras, consistent with the README")
           PY
 
       - name: data files are valid

@@ -1,6 +1,7 @@
 # Install everything with: brew bundle --file=Brewfile
-
-tap "homebrew/bundle"
+#
+# No `tap "homebrew/bundle"`: that tap was merged into Homebrew/brew, so
+# `brew bundle` is built in now and tapping it is at best a no-op.
 
 # Shell
 brew "fish"

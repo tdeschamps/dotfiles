@@ -9,7 +9,9 @@ abbr -a brews brew list -1
 abbr -a brewsp brew list --pinned
 abbr -a bubo 'brew update && brew outdated'
 abbr -a bubc 'brew upgrade && brew cleanup'
-abbr -a bubu 'bubo && bubc'
+# Spelled out: fish does not re-expand an abbreviation's own expansion, so
+# 'bubo && bubc' would fail with "Unknown command: bubo".
+abbr -a bubu 'brew update && brew outdated && brew upgrade && brew cleanup'
 # `brew cask` was removed in Homebrew 2.6 — casks are first-class now.
 abbr -a bcubo 'brew update && brew outdated --cask --greedy'
 abbr -a bcubc 'brew upgrade --cask --greedy && brew cleanup'

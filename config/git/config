@@ -1,9 +1,12 @@
 # ~/.config/git/config
 #
-# Identity lives in ~/.config/git/config.local, which is not tracked by this
-# repo. Run `bash git_setup.sh` to create it.
-[include]
-  path = config.local
+# Identity and any machine-specific overrides live in config.local, which is not
+# tracked. Run `bash git_setup.sh` to create it.
+#
+# The paths below assume $XDG_CONFIG_HOME is ~/.config, which git cannot expand
+# for itself. install.sh writes the resolved paths into config.local, and the
+# include sits at the BOTTOM of this file so those values win — git takes the
+# last value it sees for a single-valued setting.
 
 [alias]
   cad   = "!f() { git log --pretty='format:%C(yellow)%h %aD%Cred%d %Creset%s%C(cyan) [%cn]' --decorate --after=\"$1 0:00\" --before=\"$1 23:59\"; }; f"
@@ -103,3 +106,7 @@
 
 [help]
   autocorrect = prompt
+
+# Keep this last: values here override everything above.
+[include]
+  path = config.local
