@@ -12,8 +12,10 @@ ALLOWED_SIGNERS="$XDG_CONFIG_HOME/git/allowed_signers"
 
 mkdir -p "$(dirname "$LOCAL_CONFIG")"
 
-read -r -p "Your full name (as it should appear in commits): " full_name
-read -r -p "Your email address (the one on your GitHub account): " email
+# `|| true` so EOF on a closed stdin falls through to the validation below
+# rather than aborting under `set -e`.
+read -r -p "Your full name (as it should appear in commits): " full_name || true
+read -r -p "Your email address (the one on your GitHub account): " email || true
 
 if [ -z "$full_name" ] || [ -z "$email" ]; then
   echo "Both name and email are required." >&2
@@ -40,7 +42,8 @@ if [ -z "$signing_key" ]; then
   echo
   echo "No SSH key found in ~/.ssh. You need one to push to GitHub and to sign"
   echo "commits."
-  read -r -p "Generate an ed25519 key now? [Y/n] " make_key
+  make_key=""
+  read -r -p "Generate an ed25519 key now? [Y/n] " make_key || make_key="n"
   case "${make_key:-y}" in
     [Nn]*)
       echo "Skipped. Run 'ssh-keygen -t ed25519 -C \"$email\"' later, then re-run"
@@ -69,7 +72,8 @@ fi
 
 if [ -n "$signing_key" ]; then
   echo
-  read -r -p "Sign commits with $signing_key? [Y/n] " reply
+  reply=""
+  read -r -p "Sign commits with $signing_key? [Y/n] " reply || reply="n"
   case "${reply:-y}" in
     [Nn]*)
       echo "Skipping commit signing."

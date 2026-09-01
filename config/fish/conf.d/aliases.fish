@@ -15,6 +15,10 @@ end
 
 command -q bat; and alias cat bat
 
-alias v nvim
-alias vi nvim
-alias vim nvim
+# Guarded: config.fish falls back to EDITOR=vim when neovim is absent, so
+# aliasing vim -> nvim unconditionally would break the fallback.
+if command -q nvim
+    alias v nvim
+    alias vi nvim
+    alias vim nvim
+end

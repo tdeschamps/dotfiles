@@ -91,8 +91,11 @@ fi
 
 if command -v brew >/dev/null 2>&1; then
   info "installing packages from Brewfile"
-  brew update
-  brew bundle --file="$DOTFILES/Brewfile"
+  brew update || warn "brew update failed; continuing with what is installed"
+  # Non-fatal on purpose: a single unavailable package must not abort the run
+  # before anything is linked. Missing tools are reported, configs still land.
+  brew bundle --file="$DOTFILES/Brewfile" \
+    || warn "some Brewfile entries failed; see above. Continuing so configs still link."
 else
   warn "Homebrew is not available; skipping package installation"
 fi

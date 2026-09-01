@@ -103,7 +103,6 @@ On a machine that is already set up, `bash install.sh` is the only step you
 need; everything in it is idempotent.
 
 ## Languages
-## Languages
 
 Everything is managed by [mise](https://mise.jdx.dev) and pinned in
 [`config/mise/config.toml`](config/mise/config.toml), which is linked to

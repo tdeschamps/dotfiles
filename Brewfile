@@ -53,5 +53,9 @@ brew "redis"
 brew "shellcheck"
 brew "ruff"
 
-# Fonts (Nerd Fonts are in homebrew/cask-fonts, now part of core casks)
-cask "font-hack-nerd-font"
+# Fonts. Casks are macOS-only — Linuxbrew has no cask support, so guard this or
+# `brew bundle` fails the whole file. On Linux install the font from
+# https://github.com/ryanoasis/nerd-fonts/releases
+if OS.mac?
+  cask "font-hack-nerd-font"
+end
