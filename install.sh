@@ -117,8 +117,8 @@ mkdir -p "$HOME/.ssh/control"
 chmod 700 "$HOME/.ssh" "$HOME/.ssh/control"
 link "config/ssh/config" "$HOME/.ssh/config"
 
-# asdf
-link "asdfrc" "$HOME/.asdfrc"
+# mise
+link "config/mise/config.toml" "$XDG_CONFIG_HOME/mise/config.toml"
 
 # ruby
 link "gemrc" "$HOME/.gemrc"
@@ -142,25 +142,17 @@ else
 fi
 
 #
-# 4. asdf plugins
+# 4. Language runtimes
 #
-step "asdf plugins"
-if command -v asdf >/dev/null 2>&1; then
-  # Adding a plugin is a quick clone. Installing the runtimes is not — Ruby and
-  # Erlang compile from source — so that is left for you to run when ready.
-  while read -r tool _version; do
-    case "$tool" in ''|\#*) continue ;; esac
-    if asdf plugin list 2>/dev/null | grep -qx "$tool"; then
-      info "asdf plugin $tool already added"
-    else
-      info "adding asdf plugin $tool"
-      asdf plugin add "$tool" || warn "could not add asdf plugin $tool"
-    fi
-  done < "$DOTFILES/.tool-versions"
-
-  info "run 'asdf install' to build the versions in .tool-versions"
+step "Language runtimes"
+if command -v mise >/dev/null 2>&1; then
+  # No plugins to add: every runtime in config/mise/config.toml is a mise core
+  # tool. Installing them is left to you — Ruby and Erlang compile from source
+  # and that is not something an installer should start unannounced.
+  info "run 'mise install' to build the runtimes in ~/.config/mise/config.toml"
+  info "then 'mise doctor' to check the setup"
 else
-  warn "asdf is not installed; skipping plugin setup"
+  warn "mise is not installed; skipping runtime setup"
 fi
 
 #
@@ -215,7 +207,7 @@ cat <<'EOM'
 Next steps:
   1. bash git_setup.sh          set your git name and email
   2. Open a new terminal        fish is now your shell
-  3. asdf install               build the runtimes in .tool-versions (slow)
+  3. mise install               build the runtimes (Ruby and Erlang compile)
   4. Inside tmux: prefix + I    install tmux plugins
   5. nvim :LazyHealth           confirm the editor is happy
 EOM

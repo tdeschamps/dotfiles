@@ -1,0 +1,38 @@
+# ~/.config/mise/config.toml — mise's global configuration.
+#
+# This is the machine-wide default. A project's own mise.toml or .tool-versions
+# overrides it, and mise merges config files walking up from the current
+# directory, so per-repo pins win without anything special here.
+#
+#   mise install              install everything below
+#   mise use -g ruby@4.0.7    change one and record it here
+#   mise doctor               check the setup
+#   mise outdated             see what has moved on
+
+[tools]
+# Latest stable releases as of 2026-09-01. All of these are mise *core* tools,
+# built into the binary — there are no plugins to add.
+ruby = "4.0.6"
+node = "26.8.1"
+python = "3.14.7"
+go = "1.27.0"
+rust = "1.98.0"
+erlang = "29.0.6"
+elixir = "1.20.4"
+
+[settings]
+# Also read the version file a project actually ships — .ruby-version, .nvmrc
+# and friends — not just mise.toml and .tool-versions.
+#
+# mise disables these by default and they are opt-in per tool: asdf's blanket
+# legacy_version_file was dropped because reading every such file surprises
+# people. Listed here are the ones worth honouring.
+idiomatic_version_file_enable_tools = ["ruby", "node", "python"]
+
+# Delete downloaded archives after a successful install.
+always_keep_download = false
+
+[settings.status]
+# Do not print the tool list on every cd into a project.
+show_tools = false
+show_env = false

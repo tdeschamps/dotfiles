@@ -29,12 +29,14 @@ brew "tree"
 brew "htop"
 brew "gh"
 
-# Version manager. Every language runtime comes from asdf — see .tool-versions.
-brew "asdf"
+# Version manager. Every language runtime comes from mise — see
+# config/mise/config.toml. All of them are mise core tools, so there are no
+# plugins to install.
+brew "mise"
 
-# Build dependencies for the asdf plugins that compile from source.
-# Ruby and Python need these; Erlang additionally wants wxwidgets, libxslt and
-# fop if you care about observer and the docs (see README).
+# Build dependencies for the runtimes mise compiles rather than downloads.
+# Ruby needs these; Erlang additionally wants wxwidgets, libxslt and fop if you
+# care about observer and the docs (see README).
 brew "autoconf"
 brew "openssl@3"
 brew "readline"

@@ -36,7 +36,7 @@ else
 end
 
 #
-# Go — the toolchain comes from asdf; this is just where `go install` puts things
+# Go — the toolchain comes from mise; this is just where `go install` puts things
 #
 set -gx GOPATH $HOME/code/golang
 fish_add_path -g $GOPATH/bin
@@ -53,22 +53,11 @@ set -l gcloud_creds "$HOME/.google_cloud/service-account-file.json"
 test -f $gcloud_creds; and set -gx GOOGLE_APPLICATION_CREDENTIALS $gcloud_creds
 
 #
-# asdf — every language runtime (see .tool-versions)
+# mise — every language runtime (see ~/.config/mise/config.toml)
 #
-# asdf 0.16 was rewritten in Go: there is no asdf.fish to source any more, the
-# shims directory just goes on PATH. This block is verbatim from the upstream
-# fish instructions, including the deliberate avoidance of fish_add_path, which
-# can reorder PATH and let a system runtime win over a shim.
-if test -z "$ASDF_DATA_DIR"
-    set _asdf_shims "$HOME/.asdf/shims"
-else
-    set _asdf_shims "$ASDF_DATA_DIR/shims"
-end
-
-if not contains $_asdf_shims $PATH
-    set -gx --prepend PATH $_asdf_shims
-end
-set --erase _asdf_shims
+# mise hooks the shell and manages PATH directly rather than routing every call
+# through a shim, so `which ruby` reports the real binary.
+command -q mise; and mise activate fish | source
 
 #
 # fzf

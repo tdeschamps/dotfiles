@@ -12,10 +12,9 @@ config/
   tmux/          tmux.conf (XDG location, no Python/powerline dependency)
   git/           git config, global ignore, commit template
   ssh/           ssh client config
+  mise/          language runtimes and mise settings
   starship.toml  prompt
-asdfrc           asdf options (reads .ruby-version, .nvmrc, ...)
 Brewfile         every package the config expects
-.tool-versions   language runtimes, installed by asdf
 .github/         CI: syntax checks and a full LazyVim bootstrap
 install.sh       idempotent installer
 git_setup.sh     writes your git identity to an untracked local file
@@ -41,9 +40,10 @@ Then open a new terminal, and inside tmux press `prefix + I` (that is
 
 ## Languages
 
-Everything is managed by [asdf](https://asdf-vm.com) and pinned in
-[`.tool-versions`](.tool-versions). Versions are the latest stable releases as
-of **2026-09-01**.
+Everything is managed by [mise](https://mise.jdx.dev) and pinned in
+[`config/mise/config.toml`](config/mise/config.toml), which is linked to
+`~/.config/mise/config.toml`. Versions are the latest stable releases as of
+**2026-09-01**.
 
 | Language | Version |
 | -------- | ------- |
@@ -55,25 +55,30 @@ of **2026-09-01**.
 | Erlang   | 29.0.6  |
 | Elixir   | 1.20.4  |
 
-`install.sh` adds the asdf plugins for you. Building the runtimes is a separate,
-slower step:
+All seven are mise **core** tools — built into the binary, so there are no
+plugins to install.
 
 ```bash
-asdf install          # everything in .tool-versions
-asdf set ruby 4.0.7   # change one, then asdf install
+mise install              # everything pinned above
+mise use -g ruby@4.0.7    # change one, recorded back into the config
+mise outdated             # what has moved on
+mise doctor               # check the setup
 ```
 
 Node 26 is the current release line; it becomes Active LTS on 2026-10-28. Use
 `24.20.0` instead if you want LTS today.
 
-`asdfrc` sets `legacy_version_file = yes`, so asdf also honours the
-`.ruby-version`, `.nvmrc` and `.python-version` files that most repos still
-ship, not just `.tool-versions`.
+The config also sets `idiomatic_version_file_enable_tools` for Ruby, Node and
+Python, so mise honours a project's own `.ruby-version` or `.nvmrc` and not just
+`mise.toml`. mise disables these by default and makes them opt-in per tool,
+unlike asdf's blanket `legacy_version_file`.
 
-Erlang compiles from source. The Brewfile covers the common build dependencies;
-if you want `observer` and the docs, add `wxwidgets`, `libxslt` and `fop`. For
-Elixir, asdf also accepts OTP-tagged versions like `1.20.4-otp-29` when you need
-a build matched to a specific Erlang.
+Because this is the *global* config, per-project files still win: mise merges
+configuration walking up from the current directory.
+
+Erlang and Ruby compile from source. The Brewfile covers the common build
+dependencies; add `wxwidgets`, `libxslt` and `fop` if you want Erlang's
+`observer` and docs.
 
 PostgreSQL and Redis stay on Homebrew — they are services, not runtimes:
 
@@ -226,9 +231,9 @@ since 2020. The rewrite:
 - **fisher** — the vendored copy was v3.3.1 and installed itself from
   `git.io`, which GitHub shut down in 2022. `fishfile` is now `fish_plugins`.
 - **Version managers** — dropped the vendored 2013 rbenv fish shims and
-  `fast-nvm-fish`. Everything is asdf now, via `.tool-versions`. asdf 0.16 was
-  rewritten in Go, so there is no `asdf.fish` to source any more — the shims
-  directory just goes on `PATH`.
+  `fast-nvm-fish`. Everything is mise now, pinned in one global config file.
+  mise hooks the shell and manages `PATH` directly instead of using shims, so
+  `which ruby` reports the real binary.
 - **Docker** — `docker-compose` v1 reached end of life in July 2023; the
   abbreviations and completions now use `docker compose`.
 - **tmux** — the config pointed at a powerline install inside a hardcoded
