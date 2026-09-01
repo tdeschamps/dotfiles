@@ -146,6 +146,21 @@ jobs:
           python3 -c "import tomllib; tomllib.load(open('config/mise/config.toml','rb'))"
           echo "data files OK"
 
+      - name: every install.sh link source exists
+        run: |
+          # A missing source makes link() return 1, which aborts the whole
+          # installer under `set -e` — on a new machine, halfway through.
+          status=0
+          while IFS= read -r src; do
+            if [ -e "$src" ]; then
+              echo "ok      $src"
+            else
+              echo "MISSING $src"
+              status=1
+            fi
+          done < <(grep -oE '^link "[^"]+"' install.sh | sed 's/link "//;s/"//')
+          exit $status
+
       - name: installer links files idempotently
         run: |
           export HOME="$RUNNER_TEMP/linkhome"

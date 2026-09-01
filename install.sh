@@ -49,6 +49,23 @@ link() {
 }
 
 #
+# 0. Prerequisites
+#
+step "Prerequisites"
+if [ "$(uname)" = "Darwin" ]; then
+  # Homebrew, git and anything that compiles need the Command Line Tools. On a
+  # brand new Mac they are absent and the failure further down is cryptic.
+  if ! xcode-select -p >/dev/null 2>&1; then
+    error "Xcode Command Line Tools are not installed."
+    error "Run this, let it finish, then run install.sh again:"
+    error ""
+    error "    xcode-select --install"
+    exit 1
+  fi
+  info "Xcode Command Line Tools present"
+fi
+
+#
 # 1. Homebrew
 #
 step "Homebrew"

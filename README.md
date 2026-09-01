@@ -20,24 +20,89 @@ install.sh       idempotent installer
 git_setup.sh     writes your git identity to an untracked local file
 ```
 
-## Install
+## Setting up a new machine
+
+Written for macOS, which is what most of this config assumes. Linux works too —
+the ssh, tmux and Homebrew bits branch on the platform — but the notes below
+call out where it differs.
+
+**1. Command Line Tools.** Nothing else works without them: git on a fresh Mac
+is a stub that only prompts for this, and Homebrew needs a compiler.
 
 ```bash
-git clone git@github.com:tdeschamps/dotfiles.git ~/code/tdeschamps/dotfiles
+xcode-select --install
+```
+
+Wait for it to finish. `install.sh` refuses to run without it rather than
+failing later with something cryptic.
+
+**2. Clone over HTTPS.** Not SSH — you have no key yet, and the key you will
+make is configured by a file inside this repo.
+
+```bash
+git clone https://github.com/tdeschamps/dotfiles.git ~/code/tdeschamps/dotfiles
 cd ~/code/tdeschamps/dotfiles
+```
+
+**3. Install.** Takes a while, mostly Homebrew.
+
+```bash
 bash install.sh
+```
+
+It installs Homebrew if missing, runs `brew bundle`, links every config file
+(including `~/.ssh/config`), installs fisher and tpm, sets fish as your login
+shell, and bootstraps LazyVim. Anything real that is in the way is moved to
+`<file>.backup`, and re-running it is safe.
+
+**4. Git identity and SSH key.**
+
+```bash
 bash git_setup.sh
 ```
 
-`install.sh` installs Homebrew if missing, runs `brew bundle`, links every
-config file (including `~/.ssh/config`), installs fisher and tpm, sets fish as
-the login shell and syncs the Neovim plugins. `git_setup.sh` then sets your git
-identity and, if you have an SSH key, offers to enable commit signing. It backs up anything real that is in the way as
-`<file>.backup`, and re-running it is safe.
+Asks for your name and email, then offers to generate an ed25519 key if you
+have none and prints the public half. Add it to GitHub **twice** — under
+[SSH keys](https://github.com/settings/ssh/new) authentication and signing are
+separate entries and you want both. It then turns on commit signing.
 
-Then open a new terminal, and inside tmux press `prefix + I` (that is
-`Ctrl-Space` then `Shift-i`) to fetch the tmux plugins.
+Check it worked:
 
+```bash
+ssh -T git@github.com
+```
+
+**5. Switch this repo to SSH** now that the key exists, so future pushes use it:
+
+```bash
+git remote set-url origin git@github.com:tdeschamps/dotfiles.git
+```
+
+**6. Language runtimes.** Separate from `install.sh` because Ruby compiles from
+source and takes a while.
+
+```bash
+mise install
+mise doctor
+```
+
+**7. Open a new terminal.** fish is your shell now.
+
+**8. Set the terminal font** to *Hack Nerd Font* — the Brewfile installs it, but
+nothing can select it for you, and without it the prompt and status line render
+icons as empty boxes. In Terminal.app that is Settings → Profiles → Text; iTerm2
+and Ghostty have their own font settings.
+
+**9. tmux plugins.** Start tmux and press `Ctrl-Space` then `Shift-i`.
+
+**10. Check Neovim** with `:LazyHealth`.
+
+### Re-running later
+
+On a machine that is already set up, `bash install.sh` is the only step you
+need; everything in it is idempotent.
+
+## Languages
 ## Languages
 
 Everything is managed by [mise](https://mise.jdx.dev) and pinned in

@@ -28,6 +28,7 @@ git config --file "$LOCAL_CONFIG" user.email "$email"
 #
 # Preferred key first; whichever exists is offered.
 signing_key=""
+key_is_new=no
 for candidate in "$HOME/.ssh/id_ed25519.pub" "$HOME/.ssh/id_ecdsa.pub" "$HOME/.ssh/id_rsa.pub"; do
   if [ -f "$candidate" ]; then
     signing_key="$candidate"
@@ -37,12 +38,36 @@ done
 
 if [ -z "$signing_key" ]; then
   echo
-  echo "No SSH public key found in ~/.ssh, so commit signing was not enabled."
-  echo "Create one and re-run this script to turn it on:"
-  echo
-  echo "    ssh-keygen -t ed25519 -C \"$email\""
-  echo
-else
+  echo "No SSH key found in ~/.ssh. You need one to push to GitHub and to sign"
+  echo "commits."
+  read -r -p "Generate an ed25519 key now? [Y/n] " make_key
+  case "${make_key:-y}" in
+    [Nn]*)
+      echo "Skipped. Run 'ssh-keygen -t ed25519 -C \"$email\"' later, then re-run"
+      echo "this script to enable signing."
+      ;;
+    *)
+      mkdir -p "$HOME/.ssh"
+      chmod 700 "$HOME/.ssh"
+      # Passphrase is prompted interactively, which is what you want.
+      ssh-keygen -t ed25519 -C "$email" -f "$HOME/.ssh/id_ed25519"
+      signing_key="$HOME/.ssh/id_ed25519.pub"
+      key_is_new=yes
+
+      echo
+      echo "Your public key:"
+      echo
+      cat "$signing_key"
+      echo
+      echo "Add it to GitHub twice — authentication and signing are separate"
+      echo "entries there, and you want both:"
+      echo "    https://github.com/settings/ssh/new"
+      echo
+      ;;
+  esac
+fi
+
+if [ -n "$signing_key" ]; then
   echo
   read -r -p "Sign commits with $signing_key? [Y/n] " reply
   case "${reply:-y}" in
@@ -63,9 +88,13 @@ else
       fi
 
       echo
-      echo "Commit signing is on. Add the same key to GitHub as a *signing* key"
-      echo "(separate from the authentication key) at:"
-      echo "    https://github.com/settings/ssh/new"
+      if [ "$key_is_new" = "yes" ]; then
+        echo "Commit signing is on."
+      else
+        echo "Commit signing is on. If you have not already, add this key to"
+        echo "GitHub as a *signing* key — a separate entry from the"
+        echo "authentication key — at https://github.com/settings/ssh/new"
+      fi
       ;;
   esac
 fi
