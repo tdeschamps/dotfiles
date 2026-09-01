@@ -14,7 +14,6 @@ config/
   ssh/           ssh client config
   starship.toml  prompt
 Brewfile         every package the config expects
-.tool-versions   language versions (mise/asdf format)
 .github/         CI: syntax checks and a full LazyVim bootstrap
 install.sh       idempotent installer
 git_setup.sh     writes your git identity to an untracked local file
@@ -40,8 +39,10 @@ Then open a new terminal, and inside tmux press `prefix + I` (that is
 
 ## Languages
 
-Versions below are the latest stable releases as of **2026-09-01**, and match
-[`.tool-versions`](.tool-versions).
+Versions below are the latest stable releases as of **2026-09-01**. This table
+is the reference — there is deliberately no `.tool-versions` file, because
+rbenv, pyenv and nvm.fish do not read one, and a config file that nothing reads
+is just a second place for the truth to rot.
 
 | Language   | Version  | Manager            |
 | ---------- | -------- | ------------------ |
@@ -73,12 +74,17 @@ brew services start postgresql@18
 
 `brew bundle` already installs Go, Elixir, PostgreSQL 18 and rustup.
 
-If you would rather have one tool manage all of them, `mise` reads
-`.tool-versions` directly:
+If you would rather have one tool manage all of them, `mise` replaces rbenv,
+pyenv, nvm.fish and rustup, and reads a `.tool-versions` file for real:
 
 ```bash
-brew install mise && mise install
+brew install mise
+mise use --global ruby@4.0.6 node@26.8.1 python@3.14.7 go@1.27.0 rust@1.98.0
 ```
+
+That is a deliberate migration, not a drop-in: it changes how you install
+languages and removes two `init` evals from every shell start. It has not been
+made here.
 
 ### Ruby gems
 

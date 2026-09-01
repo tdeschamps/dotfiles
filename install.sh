@@ -105,7 +105,6 @@ link "config/starship.toml" "$XDG_CONFIG_HOME/starship.toml"
 link "config/git/config" "$XDG_CONFIG_HOME/git/config"
 link "config/git/gitignore" "$XDG_CONFIG_HOME/git/gitignore"
 link "config/git/gitmessage" "$XDG_CONFIG_HOME/git/gitmessage"
-link "config/git/gitk" "$XDG_CONFIG_HOME/git/gitk"
 
 if [ -f "$HOME/.gitconfig" ] && [ ! -L "$HOME/.gitconfig" ]; then
   warn "$HOME/.gitconfig exists and takes precedence over the config linked above."

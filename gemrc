@@ -1,10 +1,13 @@
 ---
-:backtrace: false
-:bulk_threshold: 1000
-:sources:
-- https://rubygems.org/
-:update_sources: true
-:verbose: true
-:concurrent_downloads: 8
-benchmark: false
-gem: "--no-document"
+# Skip rdoc/ri generation. It is most of the time spent installing a gem, and
+# nothing reads the local copies — `gem: ` applies this to every gem command.
+gem: --no-document
+
+# Everything else this file used to set has been dropped: :verbose,
+# :update_sources and :concurrent_downloads: 8 are now exactly the RubyGems
+# defaults, :bulk_threshold and benchmark are vestigial (the first is parsed but
+# unused since the bulk index API went away, the second is not read at all), and
+# :sources just restated rubygems.org.
+#
+# :backtrace: false was also removed. The RubyGems default is now true, so
+# errors come with a backtrace again — more useful when an install fails.

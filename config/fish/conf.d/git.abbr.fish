@@ -2,6 +2,21 @@
 # `Ctrl-R` show the command that actually ran.
 status is-interactive; or exit
 
+# Helpers for the branch-aware abbreviations at the bottom of this file. They
+# live here rather than in functions/ because nothing else calls them; the
+# general-purpose git_main_branch is autoloaded from functions/.
+function _git_abbr_checkout_main
+    echo "git checkout "(git_main_branch)
+end
+
+function _git_abbr_merge_origin_main
+    echo "git merge origin/"(git_main_branch)
+end
+
+function _git_abbr_rebase_main
+    echo "git rebase "(git_main_branch)
+end
+
 abbr -a g git
 
 abbr -a ga git add
