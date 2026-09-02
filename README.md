@@ -142,11 +142,9 @@ configuration walking up from the current directory.
 Ruby compiles from source; the Brewfile covers its build dependencies. The rest
 are precompiled downloads.
 
-PostgreSQL and Redis stay on Homebrew — they are services, not runtimes:
-
-```bash
-brew services start postgresql@18
-```
+No databases are installed. PostgreSQL, Redis and friends are per-project
+concerns, so add them when a project needs one — `brew install postgresql@18`,
+`brew services start postgresql@18` — rather than on every machine.
 
 ### Ruby gems
 

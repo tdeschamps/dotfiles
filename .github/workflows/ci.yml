@@ -161,6 +161,9 @@ jobs:
           python3 -c "import json; json.load(open('config/nvim/.neoconf.json'))"
           python3 -c "import tomllib; tomllib.load(open('config/starship.toml','rb'))"
           python3 -c "import tomllib; tomllib.load(open('config/mise/config.toml','rb'))"
+          # The Brewfile is evaluated as Ruby, and `brew bundle` stops at the
+          # first failure — a syntax error would abort the whole install.
+          ruby -c Brewfile > /dev/null
           echo "data files OK"
 
       - name: every install.sh link source exists

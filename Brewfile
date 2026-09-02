@@ -2,33 +2,30 @@
 #
 # No `tap "homebrew/bundle"`: that tap was merged into Homebrew/brew, so
 # `brew bundle` is built in now and tapping it is at best a no-op.
+#
+# Everything down to the "Personal tools" heading is referenced by a config file
+# in this repo — removing one breaks something. Below that line is preference,
+# and safe to cut.
 
 # Shell
 brew "fish"
-brew "starship"      # prompt (replaces powerline)
+brew "starship"      # prompt, initialised in config.fish
 brew "tmux"
 
-# Editor. LazyVim wants ripgrep, fd, lazygit and a Nerd Font (all below);
-# tree-sitter-cli is required by nvim-treesitter's main branch.
+# Editor
 brew "neovim"
-brew "lazygit"
-brew "tree-sitter-cli"
+brew "tree-sitter-cli"  # required by nvim-treesitter's main branch
+brew "lazygit"          # LazyVim binds <leader>gg to it
 
-# Core CLI
+# Referenced by the fish and git configs
 brew "git"
-brew "git-delta"     # replaces diff-so-fancy
-brew "ripgrep"       # replaces the_silver_searcher (ag)
-brew "fd"            # replaces find for fzf
-brew "fzf"
-brew "bat"
-brew "eza"           # replaces exa / lsd
-brew "zoxide"        # replaces z / autojump
-brew "jq"
-brew "wget"
-brew "curl"
-brew "tree"
-brew "htop"
-brew "gh"
+brew "git-delta"     # config/git/config sets delta as the pager — git fails without it
+brew "ripgrep"       # LazyVim's picker greps with rg
+brew "fd"            # FZF_DEFAULT_COMMAND
+brew "fzf"           # config.fish runs `fzf --fish`
+brew "bat"           # MANPAGER fallback and the `cat` alias
+brew "eza"           # the ls/ll/la/lt aliases
+brew "zoxide"
 
 # Version manager. Every language runtime comes from mise — see
 # config/mise/config.toml. All of them are mise core tools, so there are no
@@ -45,14 +42,11 @@ brew "gmp"
 brew "libffi"
 brew "zlib"
 
-# Databases
-brew "postgresql@18"
-brew "redis"
-
-# Formatters and linters. Neovim gets its own copies through Mason, so these
-# are only the ones worth having on PATH outside the editor.
-brew "shellcheck"
-brew "ruff"
+# Personal tools — nothing in this repo depends on them.
+brew "btop"          # process viewer
+brew "jq"
+brew "gh"
+brew "shellcheck"    # lets you run CI's shell check before pushing
 
 # Fonts. Casks are macOS-only — Linuxbrew has no cask support, so guard this or
 # `brew bundle` fails the whole file. On Linux install the font from
