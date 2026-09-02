@@ -227,6 +227,9 @@ if [ -n "$FISH_PATH" ]; then
   else
     info "fish is already your login shell"
   fi
+else
+  error "fish is not installed, so the login shell was left alone."
+  error "brew bundle above must have failed — scroll up for the reason."
 fi
 
 #
@@ -245,7 +248,65 @@ else
   warn "neovim is not installed; skipping plugin sync"
 fi
 
+#
+# 8. Check what actually landed
+#
+step "Check"
+problems=0
+
+fish_bin="$(command -v fish || true)"
+if [ -n "$fish_bin" ]; then
+  info "fish            $fish_bin"
+else
+  error "fish            NOT INSTALLED"
+  problems=$((problems + 1))
+fi
+
+# $SHELL reflects the shell that started this script, not the account setting,
+# so ask the system what the login shell actually is.
+# id -un rather than $USER: the latter is unset in some environments and
+# `set -u` would abort the whole run here, at the very end.
+me="$(id -un)"
+if [ "$(uname)" = "Darwin" ]; then
+  login_shell="$(dscl . -read "/Users/$me" UserShell 2>/dev/null | awk '{print $2}')"
+else
+  login_shell="$(getent passwd "$me" 2>/dev/null | cut -d: -f7)"
+fi
+
+if [ -n "$fish_bin" ] && [ "$login_shell" = "$fish_bin" ]; then
+  info "login shell     $login_shell"
+else
+  error "login shell     ${login_shell:-unknown} (expected fish)"
+  if [ -n "$fish_bin" ]; then
+    error "                fix with: chsh -s $fish_bin"
+  fi
+  problems=$((problems + 1))
+fi
+
+for tool in starship mise nvim tmux git; do
+  if command -v "$tool" >/dev/null 2>&1; then
+    info "$(printf '%-15s' "$tool")$(command -v "$tool")"
+  else
+    error "$(printf '%-15s' "$tool")NOT INSTALLED"
+    problems=$((problems + 1))
+  fi
+done
+
+if [ -L "$XDG_CONFIG_HOME/fish/config.fish" ]; then
+  info "fish config     linked"
+else
+  error "fish config     NOT LINKED"
+  problems=$((problems + 1))
+fi
+
 step "Done"
+if [ "$problems" -gt 0 ]; then
+  warn "$problems problem(s) above. Until they are fixed your terminal will not"
+  warn "look right — starship is started from config.fish, so if the shell is"
+  warn "not fish you get neither."
+  echo
+fi
+
 cat <<'EOM'
 Next steps:
   1. bash git_setup.sh          set your git name and email
@@ -253,4 +314,10 @@ Next steps:
   3. mise install               install the runtimes (Ruby compiles)
   4. Inside tmux: prefix + I    install tmux plugins
   5. nvim :LazyHealth           confirm the editor is happy
+
+If a new terminal still is not fish, check your terminal app's own setting:
+  Terminal.app  Settings > General > "Shells open with"
+  iTerm2        Settings > Profiles > General > Command
+  Ghostty       the `command` option in your config
+Any of those override the login shell.
 EOM
